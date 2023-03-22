@@ -6,7 +6,7 @@ public class Program
     {
         var client = new DiscordClient(new DiscordConfiguration()
         {
-            Token = "MTA1NTM0NzI2NzM1NzM4NDg2NA.GpYcf5.Kx-BloPTQnXwXmKeRdWT2VlAYiwghZ6i4Aed2Y",
+            Token = System.Environment.GetEnvironmentVariable("DISCORD_TOKEN"),
             TokenType = TokenType.Bot,
             Intents = DiscordIntents.All
         });
