@@ -3,8 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using RaidBot.Data;
-
+using Serilog;
 
 public class Program
 {
@@ -21,12 +22,20 @@ public class Program
         var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
         optionsBuilder.UseSqlite(connectionString);
 
+        Log.Logger = new LoggerConfiguration()
+               .WriteTo.Console()
+               .MinimumLevel.Debug()
+               .CreateLogger();
+
+        var logFactory = new LoggerFactory().AddSerilog();
+
         // Create a new Discord client
         var client = new DiscordClient(new DiscordConfiguration()
         {
             Token = System.Environment.GetEnvironmentVariable("DISCORD_TOKEN"),
             TokenType = TokenType.Bot,
-            Intents = DiscordIntents.All
+            Intents = DiscordIntents.All,
+            LoggerFactory = logFactory
         });
         // use this to check bot is recieving messages
         client.MessageCreated += async (s, e) =>
