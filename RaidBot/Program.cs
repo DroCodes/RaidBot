@@ -1,10 +1,13 @@
 ﻿using DSharpPlus;
+using DSharpPlus.SlashCommands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using RaidBot.Commands;
 using RaidBot.Data;
+using RaidBot.Data.Repository;
 using Serilog;
 
 public class Program
@@ -37,6 +40,19 @@ public class Program
             Intents = DiscordIntents.All,
             LoggerFactory = logFactory
         });
+
+        var services = new ServiceCollection()
+            .AddSingleton<IGuildSettingsRepository, GuildSettingsRepository>()
+            .AddDbContext<DataContext>(options => options.UseSqlite(connectionString))
+            .BuildServiceProvider();
+
+        var slashCommands = client.UseSlashCommands(new SlashCommandsConfiguration()
+        {
+            Services = services
+        });
+
+        // slashCommands.RegisterCommands<TestCommands>();
+        slashCommands.RegisterCommands<GuildSettingsCommands>();
         // use this to check bot is recieving messages
         client.MessageCreated += async (s, e) =>
         {
