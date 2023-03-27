@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RaidBot.Data;
 
@@ -10,9 +11,11 @@ using RaidBot.Data;
 namespace RaidBot.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230326230940_UpdateRelationships")]
+    partial class UpdateRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -81,7 +84,7 @@ namespace RaidBot.Data.Migrations
                     b.Property<string>("RoleName")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TierRoleId")
+                    b.Property<int?>("TierRoleId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -180,8 +183,7 @@ namespace RaidBot.Data.Migrations
                     b.HasOne("RaidBot.entities.TierRole", null)
                         .WithMany("Roles")
                         .HasForeignKey("TierRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>

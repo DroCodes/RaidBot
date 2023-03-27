@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RaidBot.Data;
 
@@ -10,9 +11,11 @@ using RaidBot.Data;
 namespace RaidBot.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230324185632_RaidSettings")]
+    partial class RaidSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");
@@ -70,25 +73,6 @@ namespace RaidBot.Data.Migrations
                     b.HasIndex("RaidSettingsId");
 
                     b.ToTable("DiscordUser");
-                });
-
-            modelBuilder.Entity("RaidBot.entities.DiscordRoles", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RoleName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("TierRoleId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TierRoleId");
-
-                    b.ToTable("DiscordRoles");
                 });
 
             modelBuilder.Entity("RaidBot.entities.GuildSettings", b =>
@@ -151,37 +135,11 @@ namespace RaidBot.Data.Migrations
                     b.ToTable("RaidSettings");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.TierRole", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("GuildId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Tier")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TierRoles");
-                });
-
             modelBuilder.Entity("DSharpPlus.Entities.DiscordUser", b =>
                 {
                     b.HasOne("RaidBot.entities.RaidSettings", null)
                         .WithMany("member")
                         .HasForeignKey("RaidSettingsId");
-                });
-
-            modelBuilder.Entity("RaidBot.entities.DiscordRoles", b =>
-                {
-                    b.HasOne("RaidBot.entities.TierRole", null)
-                        .WithMany("Roles")
-                        .HasForeignKey("TierRoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>
@@ -196,11 +154,6 @@ namespace RaidBot.Data.Migrations
             modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>
                 {
                     b.Navigation("member");
-                });
-
-            modelBuilder.Entity("RaidBot.entities.TierRole", b =>
-                {
-                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

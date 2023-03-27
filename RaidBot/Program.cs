@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RaidBot.Commands;
+using RaidBot.Commands.RaidCommands;
 using RaidBot.Data;
 using RaidBot.Data.Repository;
 using Serilog;
@@ -43,6 +44,8 @@ public class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IGuildSettingsRepository, GuildSettingsRepository>()
+            .AddSingleton<IRaidSettingsRepository, RaidSettingsRepository>()
+            .AddSingleton<ITierSettingsRepository, TierSettingsRepository>()
             .AddDbContext<DataContext>(options => options.UseSqlite(connectionString))
             .BuildServiceProvider();
 
@@ -51,14 +54,11 @@ public class Program
             Services = services
         });
 
-        // slashCommands.RegisterCommands<TestCommands>();
+        slashCommands.RegisterCommands<TestCommands>();
         slashCommands.RegisterCommands<GuildSettingsCommands>();
-        // use this to check bot is recieving messages
-        client.MessageCreated += async (s, e) =>
-        {
-            if (e.Message.Content.ToLower().StartsWith("ping"))
-                await e.Message.RespondAsync("pong!");
-        };
+        slashCommands.RegisterCommands<RaidCreationCommands>();
+        slashCommands.RegisterCommands<TierSettingsCommands>();
+
         // Connect to the gateway
         await client.ConnectAsync();
         await Task.Delay(-1);
