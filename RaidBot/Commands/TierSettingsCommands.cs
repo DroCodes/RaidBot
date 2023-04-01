@@ -15,11 +15,10 @@ namespace RaidBot.Commands
         }
 
         [SlashCommand("CreateTier", "Create a tier for a raid")]
-        public async Task CreateNewTierCommand(InteractionContext ctx, [Option("Tier", "Add new tier")] double tier, [Option("Role", "Add role to tier")] DiscordRole role)
+        public async Task CreateNewTierCommand(InteractionContext ctx, [Option("Tier", "Add new tier")] string tier, [Option("Role", "Add role to tier")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
-            int convertedTier = (int)tier;
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 .AddEmbed(new DiscordEmbedBuilder()
@@ -30,7 +29,7 @@ namespace RaidBot.Commands
 
             try
             {
-                var saveTier = await _repo.CreateTierRole(convertedTier, guildId, roleName);
+                var saveTier = await _repo.CreateTierRole(tier, guildId, roleName);
                 if (!saveTier)
                 {
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder()
@@ -62,11 +61,10 @@ namespace RaidBot.Commands
         }
 
         [SlashCommand("addroletotier", "Update a tier")]
-        public async Task AddRoleToTierCommand(InteractionContext ctx, [Option("Tier", "Tier to update")] double tier, [Option("Role", "Role to update")] DiscordRole role)
+        public async Task AddRoleToTierCommand(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier, [Option("Role", "Role to update")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
-            int convertedTier = (int)tier;
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 .AddEmbed(new DiscordEmbedBuilder()
@@ -77,7 +75,7 @@ namespace RaidBot.Commands
 
             try
             {
-                var updateTier = await _repo.AddRoleToTier(convertedTier, guildId, roleName);
+                var updateTier = await _repo.AddRoleToTier(tier, guildId, roleName);
 
                 if (!updateTier)
                 {
@@ -110,12 +108,11 @@ namespace RaidBot.Commands
         }
 
         [SlashCommand("removerolefromtier", "Remove a role from a tier")]
-        public async Task RemoveRoleFromTier(InteractionContext ctx, [Option("Tier", "Tier to update")] double tier, [Option("Role", "Role to update")] DiscordRole role)
+        public async Task RemoveRoleFromTier(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier, [Option("Role", "Role to update")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
-            int convertedTier = (int)tier;
-
+            
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 .AddEmbed(new DiscordEmbedBuilder()
                     .WithTitle("Updating Tier")
@@ -125,7 +122,7 @@ namespace RaidBot.Commands
 
             try
             {
-                var updateTier = await _repo.RemoveRoleFromTier(convertedTier, guildId, roleName);
+                var updateTier = await _repo.RemoveRoleFromTier(tier, guildId, roleName);
 
                 if (!updateTier)
                 {
@@ -178,7 +175,7 @@ namespace RaidBot.Commands
                     {
                         roles += $"{role}\n";
                     }
-                    embed.AddField($"Tier {tier.Tier}", roles);
+                    embed.AddField($"Tier {tier.TierName}", roles);
                 }
 
                 return ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
@@ -196,10 +193,9 @@ namespace RaidBot.Commands
         }
 
         [SlashCommand("deletetier", "delete a tier")]
-        public async Task DeleteTierCommand(InteractionContext ctx, [Option("Tier", "Tier to be deleted")] double tier)
+        public async Task DeleteTierCommand(InteractionContext ctx, [Option("Tier", "Tier to be deleted")] string tier)
         {
             ulong guildId = ctx.Guild.Id;
-            int convertedInt = (int)tier;
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
@@ -208,7 +204,7 @@ namespace RaidBot.Commands
                         .WithColor(DiscordColor.Orange)));
             try
             {
-                var deleteTier = _repo.DeleteTier(convertedInt, guildId);
+                var deleteTier = _repo.DeleteTier(tier, guildId);
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                     .AddEmbed(new DiscordEmbedBuilder().WithTitle("Success")

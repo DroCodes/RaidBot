@@ -2,12 +2,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RaidBot.entities
 {
-    public class TierRole
+    public class ActiveRaids
     {
-        public int Id { get; set; }
+        public int id { get; set; }
+        public List<RaidSettings>? ActiveRaidsList { get; set; }
         public ulong GuildId { get; set; }
-        public string? TierName { get; set; }
-        public List<AssignedTierRoles>? Roles { get; set; }
 
         [ForeignKey("GuildId")]
         public GuildSettings GuildSettings { get; set; }

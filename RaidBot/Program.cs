@@ -32,11 +32,15 @@ public class Program
                .CreateLogger();
 
         var logFactory = new LoggerFactory().AddSerilog();
+        
+        string token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
+        Console.WriteLine("DISCORD_TOKEN: " + token);
+
 
         // Create a new Discord client
         var client = new DiscordClient(new DiscordConfiguration()
         {
-            Token = System.Environment.GetEnvironmentVariable("DISCORD_TOKEN"),
+            Token = token,
             TokenType = TokenType.Bot,
             Intents = DiscordIntents.All,
             LoggerFactory = logFactory
