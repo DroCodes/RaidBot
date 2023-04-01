@@ -10,17 +10,18 @@ namespace RaidBot.Data.Repository
             _context = ctx;
         }
 
-        public async Task<bool> CreateTierRole(int tier, ulong guildId, string roleName)
+        public async Task<bool> CreateTierRole(string tier, ulong guildId, string roleName)
         {
-            var tierRole = _context.TierRoles.FirstOrDefault(x => x.Tier == tier && x.GuildId == guildId);
+            var id = _context.GuildSettings.FirstOrDefault(g => g.GuildId == guildId);
+            var tierRole = _context.TierRoles.FirstOrDefault(x => x.TierName == tier && x.GuildId == id.GuildId);
             if (tierRole != null) return false;
             var newTier = new TierRole
             {
-                Tier = tier,
+                TierName = tier,
                 GuildId = guildId,
-                Roles = new List<DiscordRoles>
+                Roles = new List<AssignedTierRoles>
                 {
-                    new DiscordRoles
+                    new()
                     {
                         RoleName = roleName
                     }
@@ -31,18 +32,18 @@ namespace RaidBot.Data.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> AddRoleToTier(int tier, ulong guildId, string roleName)
+        public async Task<bool> AddRoleToTier(string tier, ulong guildId, string roleName)
         {
-            var tierRole = _context.TierRoles.FirstOrDefault(x => x.Tier == tier && x.GuildId == guildId);
+            var tierRole = _context.TierRoles.FirstOrDefault(x => x.TierName == tier && x.GuildId == guildId);
 
             if (tierRole == null) return false;
 
             if (tierRole.Roles == null)
             {
-                tierRole.Roles = new List<DiscordRoles>();
+                tierRole.Roles = new List<AssignedTierRoles>();
             }
 
-            tierRole.Roles.Add(new DiscordRoles
+            tierRole.Roles.Add(new AssignedTierRoles()
             {
                 RoleName = roleName
             });
@@ -50,10 +51,10 @@ namespace RaidBot.Data.Repository
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> RemoveRoleFromTier(int tier, ulong guildId, string roleName)
+        public async Task<bool> RemoveRoleFromTier(string tier, ulong guildId, string roleName)
         {
 
-            var tierRole = _context.TierRoles.FirstOrDefault(x => x.Tier == tier && x.GuildId == guildId);
+            var tierRole = _context.TierRoles.FirstOrDefault(x => x.TierName == tier && x.GuildId == guildId);
 
             if (tierRole == null)
             {
@@ -67,13 +68,13 @@ namespace RaidBot.Data.Repository
                 return false;
             }
 
-            var discordRole = _context.DiscordRoles.FirstOrDefault(x => x.RoleName == roleName);
+            var discordRole = _context.AssignedTierRoles.FirstOrDefault(x => x.RoleName == roleName);
             if (discordRole == null)
             {
                 return false;
             }
 
-            _context.DiscordRoles.Remove(discordRole);
+            _context.AssignedTierRoles.Remove(discordRole);
 
             tierRole.Roles.Remove(role);
             return await _context.SaveChangesAsync() > 0;
@@ -88,7 +89,7 @@ namespace RaidBot.Data.Repository
 
         public List<string>? GetRolesFromTier(int id, ulong guildId)
         {
-            var roles = _context.DiscordRoles.Where(x => x.TierRoleId == id);
+            var roles = _context.AssignedTierRoles.Where(x => x.AssignedTierRoleId == id);
             List<string> roleList = new List<string>();
 
             if (roles == null)
@@ -104,16 +105,16 @@ namespace RaidBot.Data.Repository
             return roleList;
         }
 
-        public async Task<bool> DeleteTier(int tier, ulong guildId)
+        public async Task<bool> DeleteTier(string tier, ulong guildId)
         {
-            var getTier = _context.TierRoles.FirstOrDefault(x => x.Tier == tier && x.GuildId == guildId);
-            var getRoles = _context.DiscordRoles.Where(x => x.TierRoleId == getTier.Id);
+            var getTier = _context.TierRoles.FirstOrDefault(x => x.TierName == tier && x.GuildId == guildId);
+            var getRoles = _context.AssignedTierRoles.Where(x => x.AssignedTierRoleId == getTier.Id);
 
             if (getTier == null || getRoles == null) return false;
 
             foreach(var role in getRoles)
             {
-                _context.DiscordRoles.Remove(role);
+                _context.AssignedTierRoles.Remove(role);
             }
 
             _context.TierRoles.Remove(getTier);

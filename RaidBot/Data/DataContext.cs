@@ -1,3 +1,4 @@
+using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using RaidBot.entities;
 
@@ -11,18 +12,89 @@ namespace RaidBot.Data
         }
 
         public DbSet<GuildSettings> GuildSettings { get; set; }
+        public DbSet<ActiveRaids> ActiveRaids { get; set; }
         public DbSet<RaidSettings> RaidSettings { get; set; }
+        public DbSet<GuildMember> GuildMember { get; set; }
         public DbSet<TierRole> TierRoles { get; set; }
-        public DbSet<DiscordRoles> DiscordRoles { get; set; }
+        public DbSet<AssignedTierRoles> AssignedTierRoles { get; set; }
+        public DbSet<UserRaidHistory> UserRaidHistories { get; set; }
+        public DbSet<RaidStatsByRole> RaidStatsByRoles { get; set; }
+        public DbSet<RaidStatsByTier> RaidStatsByTiers { get; set; }
+        public DbSet<Roles> Roles { get; set; }
+        public DbSet<SignUpEmoji> SignUpEmojis { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<TierRole>()
-                .HasMany(t => t.Roles)
-                .WithOne()
-                .HasForeignKey("TierRoleId")
+            modelBuilder.Entity<GuildSettings>()
+                .HasKey(g => g.GuildId);
+            // start of ActivityRaids table relations
+            modelBuilder.Entity<ActiveRaids>()
+                .HasOne(a => a.GuildSettings)
+                .WithMany()
+                .HasForeignKey(x => x.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
-        }
 
+            modelBuilder.Entity<RaidSettings>()
+                .HasOne<ActiveRaids>(r => r.ActiveRaids)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<Roles>()
+                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .WithMany()
+                .HasForeignKey(r => r.RaidSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SignUpEmoji>()
+                .HasOne<RaidSettings>(s => s.RaidSettings)
+                .WithMany()
+                .HasForeignKey(s => s.RaidSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // end of ActivityRaids relationship
+            // Beginning of Tier Role relationships
+            modelBuilder.Entity<TierRole>()
+                .HasOne<GuildSettings>(t => t.GuildSettings)
+                .WithMany()
+                .HasForeignKey(t => t.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<AssignedTierRoles>()
+                .HasOne<TierRole>(t => t.TierRole)
+                .WithMany()
+                .HasForeignKey(r => r.AssignedTierRoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // end of TierRole relationship
+            // beggniing of guild member relations
+            modelBuilder.Entity<GuildMember>()
+                .HasOne(g => g.GuildSettings)
+                .WithMany()
+                .HasForeignKey(g => g.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserRaidHistory>()
+                .HasOne<GuildMember>(u => u.GuildMember)
+                .WithMany()
+                .HasForeignKey(u => u.GuildMemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<RaidStatsByRole>()
+                .HasOne<UserRaidHistory>(t => t.UserRaidHistory)
+                .WithMany()
+                .HasForeignKey(r => r.RaidHistoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<RaidStatsByTier>()
+                .HasOne<UserRaidHistory>(t => t.UserRaidHistory)
+                .WithMany()
+                .HasForeignKey(r => r.RaidHistoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // end of GuildMember relations
+            
+            // Ignores DSharpPlus DiscordRoleTags Entity
+            modelBuilder.Ignore<DiscordRoleTags>();
+
+        }
+        
     }
 }

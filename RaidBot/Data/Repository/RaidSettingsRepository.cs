@@ -4,7 +4,7 @@ namespace RaidBot.Data.Repository
 {
     public class RaidSettingsRepository : IRaidSettingsRepository
     {
-        private DataContext _context;
+        private readonly DataContext _context;
         public RaidSettingsRepository(DataContext ctx)
         {
             _context = ctx;
@@ -12,14 +12,14 @@ namespace RaidBot.Data.Repository
 
         public async Task<bool> SaveNewRaid(string raidName, ulong guildId)
         {
-            if (_context.RaidSettings.Any(x => x.Name == raidName) && _context.RaidSettings.Any(x => x.GuildId == guildId))
+            if (_context.RaidSettings.Any(x => x.RaidName == raidName) && _context.RaidSettings.Any(x => x.GuildId == guildId))
             {
                 return false;
             }
 
             RaidSettings raidSettings = new RaidSettings
             {
-                Name = raidName,
+                RaidName = raidName,
                 GuildId = guildId
             };
             _context.RaidSettings.Add(raidSettings);
@@ -28,7 +28,7 @@ namespace RaidBot.Data.Repository
 
         public async Task<bool> DeleteRaid(string raidName, ulong guildId)
         {
-            var raid = _context.RaidSettings.FirstOrDefault(x => x.Name == raidName && x.GuildId == guildId);
+            var raid = _context.RaidSettings.FirstOrDefault(x => x.RaidName == raidName && x.GuildId == guildId);
 
             if (raid == null)
             {
