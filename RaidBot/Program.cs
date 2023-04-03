@@ -9,32 +9,31 @@ using RaidBot.Commands;
 using RaidBot.Commands.RaidCommands;
 using RaidBot.Data;
 using RaidBot.Data.Repository;
+using RaidBot.Util;
 using Serilog;
 
 public class Program
 {
     static async Task Main(string[] args)
     {
-        IConfiguration builder;
-        builder = new ConfigurationBuilder()
-           .SetBasePath(Directory.GetCurrentDirectory())
-           .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-           .AddJsonFile("appsettings.development.json", optional: true, reloadOnChange: true)
-           .Build();
-
+        IConfiguration builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            .AddJsonFile("appsettings.development.json", optional: true, reloadOnChange: true)
+            .Build();
+        
         var connectionString = builder.GetConnectionString("DefaultConnection");
         var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
-        optionsBuilder.UseSqlite(connectionString);
-
+        optionsBuilder.UseNpgsql(connectionString);
+        
         Log.Logger = new LoggerConfiguration()
                .WriteTo.Console()
                .MinimumLevel.Debug()
                .CreateLogger();
 
         var logFactory = new LoggerFactory().AddSerilog();
-        
-        string token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
-        Console.WriteLine("DISCORD_TOKEN: " + token);
+
+        string? token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
 
 
         // Create a new Discord client
@@ -50,7 +49,8 @@ public class Program
             .AddSingleton<IGuildSettingsRepository, GuildSettingsRepository>()
             .AddSingleton<IRaidSettingsRepository, RaidSettingsRepository>()
             .AddSingleton<ITierSettingsRepository, TierSettingsRepository>()
-            .AddDbContext<DataContext>(options => options.UseSqlite(connectionString))
+            .AddSingleton<IMessageBuilder, MessageBuilder>()
+            .AddDbContext<DataContext>(options => options.UseNpgsql(connectionString))
             .BuildServiceProvider();
 
         var slashCommands = client.UseSlashCommands(new SlashCommandsConfiguration()
@@ -82,6 +82,6 @@ public class Program
                     services.AddSingleton<IConfiguration>(builder);
 
                     var connectionString = builder.GetConnectionString("DefaultConnection");
-                    services.AddDbContext<DataContext>(options => options.UseSqlite(connectionString));
+                    services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
                 });
 }

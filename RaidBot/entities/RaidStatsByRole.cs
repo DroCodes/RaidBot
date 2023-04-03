@@ -10,7 +10,6 @@ namespace RaidBot.entities
         public int Count { get; set; }
 
         [ForeignKey("RaidHistoryId")]
-        public UserRaidHistory UserRaidHistory { get; set; }
-
+        public UserRaidHistory? UserRaidHistory { get; set; }
     }
 }

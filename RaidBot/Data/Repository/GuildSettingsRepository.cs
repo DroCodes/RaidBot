@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RaidBot.entities;
 
 
@@ -5,7 +6,7 @@ namespace RaidBot.Data.Repository
 {
     public class GuildSettingsRepository : IGuildSettingsRepository
     {
-        private DataContext? _context;
+        private readonly DataContext _context;
         public GuildSettingsRepository(DataContext ctx)
         {
             _context = ctx;
@@ -13,15 +14,24 @@ namespace RaidBot.Data.Repository
 
         public async Task<bool> AddGuildId(ulong guildId)
         {
-            if (_context.GuildSettings.Any(x => x.GuildId == guildId)) return false;
-
-            GuildSettings guildSettings = new GuildSettings
+            try
+            {
+                if (_context.GuildSettings.Any(x => x.GuildId == guildId)) return false;
+            
+            var guildSettings = new GuildSettings
             {
                 GuildId = guildId
             };
 
-            await _context.GuildSettings.AddAsync(guildSettings);
-            await _context.SaveChangesAsync();
+                _context.GuildSettings.Add(guildSettings);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+           
             return true;
         }
 

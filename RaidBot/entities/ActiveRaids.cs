@@ -9,6 +9,6 @@ namespace RaidBot.entities
         public ulong GuildId { get; set; }
 
         [ForeignKey("GuildId")]
-        public GuildSettings GuildSettings { get; set; }
+        public GuildSettings? GuildSettings { get; set; }
     }
 }

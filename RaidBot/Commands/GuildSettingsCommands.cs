@@ -2,65 +2,57 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using RaidBot.Data.Repository;
+using RaidBot.Util;
 
 namespace RaidBot.Commands
 {
     public class GuildSettingsCommands : ApplicationCommandModule
     {
         private static IGuildSettingsRepository? _guildSettings;
-        public GuildSettingsCommands(IGuildSettingsRepository guildSettingsRepository)
+        private readonly IMessageBuilder _messageBuilder;
+        public GuildSettingsCommands(IGuildSettingsRepository guildSettingsRepository, IMessageBuilder MessageBuilder)
         {
             _guildSettings = guildSettingsRepository;
+            _messageBuilder = MessageBuilder;
         }
 
         [SlashCommand("setguildid", "Set the guild id")]
-        public static async Task SetGuildIdCommand(InteractionContext ctx)
+        public  async Task SetGuildIdCommand(InteractionContext ctx)
         {
             ulong guildId = ctx.Guild.Id;
-
+            _messageBuilder.Title = "Thinking";
+            
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Seting guild id to " + guildId)
-                    .WithColor(DiscordColor.Green)
-                ));
+                .AddEmbed(_messageBuilder.EmbedBuilder()));
 
-            try
-            {
                 if (!await _guildSettings.AddGuildId(guildId))
                 {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("The Guild Id has already been set")
-                        .WithColor(DiscordColor.Red)
-                    ));
-
+                    _messageBuilder.Title = "Guild Id has already been set";
+                    _messageBuilder.Color= DiscordColor.Red;
+                    
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder()));                
                 }
                 else
                 {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Set guild id to " + guildId)
-                        .WithColor(DiscordColor.Green)
+                    _messageBuilder.Title = "Success";
+                    _messageBuilder.Description = $"Guild Id set to {guildId}";
+                    _messageBuilder.Color= DiscordColor.Green;
+
+                    await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder()
                     ));
                 }
-            }
-            catch (Exception e)
-            {
-                await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Error: " + e.Message)
-                    .WithColor(DiscordColor.Red)
-                ));
-            }
         }
 
         [SlashCommand("setraidchannel", "Set the raid channel")]
-        public static async Task SetRaidChannelCommand(InteractionContext ctx, [Option("channel", "The channel to set")] DiscordChannel channel)
+        public async Task SetRaidChannelCommand(InteractionContext ctx, [Option("channel", "The channel to set")] DiscordChannel channel)
         {
             ulong guildId = ctx.Guild.Id;
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder().AddEmbed(new DiscordEmbedBuilder()
-                .WithTitle("Seting raid channel to " + channel.Name)
-                .WithColor(DiscordColor.Green)
-            ));
+            _messageBuilder.Title = "Guild Id has already been set";
+            _messageBuilder.Color= DiscordColor.Red;
+                    
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder()));
 
             try
             {
