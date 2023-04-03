@@ -1,1 +1,0 @@
-DELETE FROM TierRoles Where Id = 1

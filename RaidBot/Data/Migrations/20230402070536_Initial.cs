@@ -1,9 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace RaidBot.Migrations
+namespace RaidBot.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -15,28 +16,27 @@ namespace RaidBot.Migrations
                 name: "DiscordMember",
                 columns: table => new
                 {
-                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Nickname = table.Column<string>(type: "TEXT", nullable: false),
-                    CommunicationDisabledUntil = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    JoinedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
-                    PremiumSince = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
-                    IsDeafened = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsMuted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsPending = table.Column<bool>(type: "INTEGER", nullable: true),
-                    Username = table.Column<string>(type: "TEXT", nullable: false),
-                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    BannerHash = table.Column<string>(type: "TEXT", nullable: false),
-                    AvatarHash = table.Column<string>(type: "TEXT", nullable: false),
-                    IsBot = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Email = table.Column<string>(type: "TEXT", nullable: false),
-                    MfaEnabled = table.Column<bool>(type: "INTEGER", nullable: true),
-                    Verified = table.Column<bool>(type: "INTEGER", nullable: true),
-                    Locale = table.Column<string>(type: "TEXT", nullable: false),
-                    OAuthFlags = table.Column<int>(type: "INTEGER", nullable: true),
-                    Flags = table.Column<int>(type: "INTEGER", nullable: true),
-                    IsSystem = table.Column<bool>(type: "INTEGER", nullable: true),
-                    PremiumType = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    Nickname = table.Column<string>(type: "text", nullable: false),
+                    CommunicationDisabledUntil = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    JoinedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PremiumSince = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    IsDeafened = table.Column<bool>(type: "boolean", nullable: false),
+                    IsMuted = table.Column<bool>(type: "boolean", nullable: false),
+                    IsPending = table.Column<bool>(type: "boolean", nullable: true),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    Discriminator = table.Column<string>(type: "text", nullable: false),
+                    BannerHash = table.Column<string>(type: "text", nullable: false),
+                    AvatarHash = table.Column<string>(type: "text", nullable: false),
+                    IsBot = table.Column<bool>(type: "boolean", nullable: false),
+                    Email = table.Column<string>(type: "text", nullable: false),
+                    MfaEnabled = table.Column<bool>(type: "boolean", nullable: true),
+                    Verified = table.Column<bool>(type: "boolean", nullable: true),
+                    Locale = table.Column<string>(type: "text", nullable: false),
+                    OAuthFlags = table.Column<int>(type: "integer", nullable: true),
+                    Flags = table.Column<int>(type: "integer", nullable: true),
+                    IsSystem = table.Column<bool>(type: "boolean", nullable: true),
+                    PremiumType = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,10 +47,9 @@ namespace RaidBot.Migrations
                 name: "GuildSettings",
                 columns: table => new
                 {
-                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RaidChannelId = table.Column<ulong>(type: "INTEGER", nullable: true),
-                    RaidChannelGroup = table.Column<ulong>(type: "INTEGER", nullable: true)
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    RaidChannelId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    RaidChannelGroup = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -61,16 +60,15 @@ namespace RaidBot.Migrations
                 name: "DiscordRole",
                 columns: table => new
                 {
-                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    IsHoisted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IconHash = table.Column<string>(type: "TEXT", nullable: false),
-                    Position = table.Column<int>(type: "INTEGER", nullable: false),
-                    Permissions = table.Column<long>(type: "INTEGER", nullable: false),
-                    IsManaged = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsMentionable = table.Column<bool>(type: "INTEGER", nullable: false),
-                    DiscordMemberId = table.Column<ulong>(type: "INTEGER", nullable: true)
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    IsHoisted = table.Column<bool>(type: "boolean", nullable: false),
+                    IconHash = table.Column<string>(type: "text", nullable: false),
+                    Position = table.Column<int>(type: "integer", nullable: false),
+                    Permissions = table.Column<long>(type: "bigint", nullable: false),
+                    IsManaged = table.Column<bool>(type: "boolean", nullable: false),
+                    IsMentionable = table.Column<bool>(type: "boolean", nullable: false),
+                    DiscordMemberId = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -86,9 +84,9 @@ namespace RaidBot.Migrations
                 name: "ActiveRaids",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,11 +103,11 @@ namespace RaidBot.Migrations
                 name: "GuildMember",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    DiscordMemberId = table.Column<ulong>(type: "INTEGER", nullable: true),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    DiscordMemberId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,10 +129,10 @@ namespace RaidBot.Migrations
                 name: "TierRoles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    TierName = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    TierName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -151,16 +149,16 @@ namespace RaidBot.Migrations
                 name: "RaidSettings",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GuildId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    RaidId = table.Column<int>(type: "INTEGER", nullable: false),
-                    RaidName = table.Column<string>(type: "TEXT", nullable: true),
-                    TierRole = table.Column<string>(type: "TEXT", nullable: true),
-                    Info = table.Column<string>(type: "TEXT", nullable: true),
-                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Time = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    ActiveRaidsid = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    RaidId = table.Column<int>(type: "integer", nullable: false),
+                    RaidName = table.Column<string>(type: "text", nullable: true),
+                    TierRole = table.Column<string>(type: "text", nullable: true),
+                    Info = table.Column<string>(type: "text", nullable: true),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ActiveRaidsid = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -182,12 +180,12 @@ namespace RaidBot.Migrations
                 name: "UserRaidHistories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GuildMemberId = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalRaidCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    TotalRaidCountLastMonth = table.Column<int>(type: "INTEGER", nullable: false),
-                    LastRaidDate = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    GuildMemberId = table.Column<int>(type: "integer", nullable: false),
+                    TotalRaidCount = table.Column<int>(type: "integer", nullable: false),
+                    TotalRaidCountLastMonth = table.Column<int>(type: "integer", nullable: false),
+                    LastRaidDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -204,11 +202,11 @@ namespace RaidBot.Migrations
                 name: "AssignedTierRoles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AssignedTierRoleId = table.Column<int>(type: "INTEGER", nullable: false),
-                    RoleName = table.Column<string>(type: "TEXT", nullable: true),
-                    TierRoleId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AssignedTierRoleId = table.Column<int>(type: "integer", nullable: false),
+                    RoleName = table.Column<string>(type: "text", nullable: true),
+                    TierRoleId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,12 +228,12 @@ namespace RaidBot.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RaidSettingsId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Tank = table.Column<string>(type: "TEXT", nullable: true),
-                    Healer = table.Column<string>(type: "TEXT", nullable: true),
-                    Dps = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RaidSettingsId = table.Column<int>(type: "integer", nullable: false),
+                    Tank = table.Column<string>(type: "text", nullable: true),
+                    Healer = table.Column<string>(type: "text", nullable: true),
+                    Dps = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -252,12 +250,11 @@ namespace RaidBot.Migrations
                 name: "SignUpEmojis",
                 columns: table => new
                 {
-                    Id = table.Column<ulong>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RaidSettingsId = table.Column<int>(type: "INTEGER", nullable: false),
-                    AssignedRole = table.Column<ulong>(type: "INTEGER", nullable: true),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Url = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    RaidSettingsId = table.Column<int>(type: "integer", nullable: false),
+                    AssignedRole = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Url = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -274,12 +271,12 @@ namespace RaidBot.Migrations
                 name: "RaidStatsByRoles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RaidHistoryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Role = table.Column<string>(type: "TEXT", nullable: true),
-                    Count = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserRaidHistoryId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RaidHistoryId = table.Column<int>(type: "integer", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: true),
+                    Count = table.Column<int>(type: "integer", nullable: false),
+                    UserRaidHistoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -301,12 +298,12 @@ namespace RaidBot.Migrations
                 name: "RaidStatsByTiers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    RaidHistoryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    TierName = table.Column<string>(type: "TEXT", nullable: true),
-                    TierCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserRaidHistoryId = table.Column<int>(type: "INTEGER", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RaidHistoryId = table.Column<int>(type: "integer", nullable: false),
+                    TierName = table.Column<string>(type: "text", nullable: true),
+                    TierCount = table.Column<int>(type: "integer", nullable: false),
+                    UserRaidHistoryId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {

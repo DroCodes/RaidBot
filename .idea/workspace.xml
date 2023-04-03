@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="53751dd1-54c1-4971-a14e-00c19bcb9f3d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.idea.RaidBot/.idea/dataSources.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/RaidBot/Data/Migrations/20230402050051_initial.Designer.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/RaidBot/Data/Migrations/20230402050051_initial.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/RaidBot/Data/Migrations/DataContextModelSnapshot.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/raidSettings.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Commands/GuildSettingsCommands.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RaidBot/Commands/GuildSettingsCommands.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Data/Repository/GuildSettingsRepository.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RaidBot/Data/Repository/GuildSettingsRepository.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Migrations/20230401092018_Initial.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Migrations/20230401092018_Initial.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Migrations/DataContextModelSnapshot.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/RaidBot/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/RaidBot.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/RaidBot/RaidBot.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RaidBot/raidSettings.db" beforeDir="false" afterPath="$PROJECT_DIR$/RaidBot/raidSettings.db" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="2NrKs6jSN5XpEely0EY214MLbwV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "/Users/deondaigh/Documents/DiscordBots/RaidBot"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+</project>
