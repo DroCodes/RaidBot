@@ -165,18 +165,13 @@ namespace RaidBot.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AssignedTierRoleId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("RoleName")
                         .HasColumnType("text");
 
-                    b.Property<int?>("TierRoleId")
+                    b.Property<int>("TierRoleId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedTierRoleId");
 
                     b.HasIndex("TierRoleId");
 
@@ -446,14 +441,10 @@ namespace RaidBot.Data.Migrations
             modelBuilder.Entity("RaidBot.entities.AssignedTierRoles", b =>
                 {
                     b.HasOne("RaidBot.entities.TierRole", "TierRole")
-                        .WithMany()
-                        .HasForeignKey("AssignedTierRoleId")
+                        .WithMany("Roles")
+                        .HasForeignKey("TierRoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("RaidBot.entities.TierRole", null)
-                        .WithMany("Roles")
-                        .HasForeignKey("TierRoleId");
 
                     b.Navigation("TierRole");
                 });

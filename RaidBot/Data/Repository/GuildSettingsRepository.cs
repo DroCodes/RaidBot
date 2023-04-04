@@ -1,5 +1,7 @@
+using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using RaidBot.entities;
+using RaidBot.Util;
 
 
 namespace RaidBot.Data.Repository
@@ -7,16 +9,19 @@ namespace RaidBot.Data.Repository
     public class GuildSettingsRepository : IGuildSettingsRepository
     {
         private readonly DataContext _context;
-        public GuildSettingsRepository(DataContext ctx)
+        private readonly ILogger _logger;
+        public GuildSettingsRepository(DataContext ctx, ILogger logger)
         {
             _context = ctx;
+            _logger = logger;
         }
 
         public async Task<bool> AddGuildId(ulong guildId)
         {
             try
             {
-                if (_context.GuildSettings.Any(x => x.GuildId == guildId)) return false;
+                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDB != null) return false;
             
             var guildSettings = new GuildSettings
             {
@@ -24,12 +29,12 @@ namespace RaidBot.Data.Repository
             };
 
                 _context.GuildSettings.Add(guildSettings);
-                await _context.SaveChangesAsync();
+                return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _logger.LogError(e, "Error Saving GuildId in AddGuildId method");
+                return false;
             }
            
             return true;
@@ -37,14 +42,66 @@ namespace RaidBot.Data.Repository
 
         public async Task<bool> SetRaidChannelId(ulong guildId, ulong raidChannelId)
         {
-            if (!_context.GuildSettings.Any(x => x.GuildId == guildId)) return false;
+            try
+            {
+                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDB == null) return false;
+                
+                var guildSettings = _context.GuildSettings.FirstOrDefault(x => x.GuildId == guildId);
+                guildSettings.RaidChannelId = raidChannelId;
 
-            GuildSettings guildSettings = _context.GuildSettings.First(x => x.GuildId == guildId);
-            guildSettings.RaidChannelId = raidChannelId;
+                _context.GuildSettings.Update(guildSettings);
+               
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error Saving RaidChannelId in SetRaidChannel method");
+                return false;
+            }
+        }
 
-            _context.GuildSettings.Update(guildSettings);
-            await _context.SaveChangesAsync();
-            return true;
+        public async Task<bool> SetRaidChannelGroup(ulong guildId, ulong? channelGroupId)
+        {
+            
+            try
+            {
+                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDB == null) return false;
+
+                var guildSettings = _context.GuildSettings.FirstOrDefault(x => x.GuildId == guildId);
+                guildSettings.RaidChannelGroup = channelGroupId;
+
+                _context.GuildSettings.Update(guildSettings);
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error setting channel group");
+                return false;
+            }
+        }
+
+        public async Task<List<ulong?>> CheckGuildSettings(ulong guildId)
+        {
+            try
+            {
+                var checkGuildExists = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExists == null) return null;
+
+                return new List<ulong?>()
+                {
+                    checkGuildExists.GuildId,
+                    (ulong?)checkGuildExists.RaidChannelId,
+                    (ulong?)checkGuildExists.RaidChannelGroup
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error retrieving guild settings");
+                return null;
+            }
+            
         }
     }
 }

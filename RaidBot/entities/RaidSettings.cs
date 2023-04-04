@@ -12,9 +12,7 @@ namespace RaidBot.entities
         public string? Info { get; set; }
         public DateTime Date { get; set; }
         public DateTime Time { get; set; }
-
-        // [ForeignKey("GuildId")]
-        // public GuildSettings GuildSettings { get; set; }
+        
         [ForeignKey("RaidId")]
         public ActiveRaids ActiveRaids { get; set; }
     }

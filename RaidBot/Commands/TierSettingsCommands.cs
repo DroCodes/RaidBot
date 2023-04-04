@@ -3,193 +3,157 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using RaidBot.Data.Repository;
 using RaidBot.entities;
+using RaidBot.Util;
 
 namespace RaidBot.Commands
 {
     public class TierSettingsCommands : ApplicationCommandModule
     {
-        private static ITierSettingsRepository? _repo;
-        public TierSettingsCommands(ITierSettingsRepository repo)
+        private readonly ITierSettingsRepository _repo;
+        private readonly IMessageBuilder _messageBuilder;
+        private readonly string _initialResponse = "Thinking";
+        private string? _title;
+        private string? _description;
+        private DiscordColor? _color;
+
+        public TierSettingsCommands(ITierSettingsRepository repo, IMessageBuilder messageBuilder)
         {
             _repo = repo;
+            _messageBuilder = messageBuilder;
         }
 
-        [SlashCommand("CreateTier", "Create a tier for a raid")]
-        public async Task CreateNewTierCommand(InteractionContext ctx, [Option("Tier", "Add new tier")] string tier, [Option("Role", "Add role to tier")] DiscordRole role)
+        [SlashCommand("createtier", "Create a tier for a raid")]
+        public async Task CreateNewTierCommand(InteractionContext ctx,
+            [Option("TierName", "Name for the Tier")]
+            string tier,
+            [Option("Role", "Role for the tier")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Creating Tier")
-                    .WithDescription("Standby")
-                    .WithColor(DiscordColor.Orange)
-                ));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    ));
 
-            try
+            var saveTier = await _repo.CreateTierRole(tier, guildId, roleName);
+            if (!saveTier)
             {
-                var saveTier = await _repo.CreateTierRole(tier, guildId, roleName);
-                if (!saveTier)
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Error")
-                            .WithDescription("Tier already exists")
-                            .WithColor(DiscordColor.Red)
-                        ));
-                }
-                else
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Tier Created")
-                            .WithDescription("Tier Successfully Created")
-                            .WithColor(DiscordColor.Green)
-                        ));
-                }
-            }
-            catch (Exception e)
-            {
+                _title = "Error";
+                _description = "Tier already exists";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                    ));
+            }
+            else
+            {
+                _title = "Success";
+                _description = $"Tier {tier} successfully created";
+                _color = DiscordColor.Green;
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                     ));
             }
         }
 
         [SlashCommand("addroletotier", "Update a tier")]
-        public async Task AddRoleToTierCommand(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier, [Option("Role", "Role to update")] DiscordRole role)
+        public async Task AddRoleToTierCommand(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier,
+            [Option("Role", "Role to update")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Updating Tier")
-                    .WithDescription("Standby")
-                    .WithColor(DiscordColor.Orange)
-                ));
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    ));
 
-            try
-            {
-                var updateTier = await _repo.AddRoleToTier(tier, guildId, roleName);
+            var updateTier = await _repo.AddRoleToTier(tier, guildId, roleName);
 
-                if (!updateTier)
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Error")
-                            .WithDescription("Tier does not exist")
-                            .WithColor(DiscordColor.Red)
-                        ));
-                }
-                else
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Tier Updated")
-                            .WithDescription("Tier Successfully Updated")
-                            .WithColor(DiscordColor.Green)
-                        ));
-                }
-            }
-            catch (Exception e)
+            if (!updateTier)
             {
+                _title = "Error";
+                _description = "Tier does not exist";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                    ));
+            }
+            else
+            {
+                _title = "Success";
+                _description = "Tier successfully updated";
+                _color = DiscordColor.Green;
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                     ));
             }
         }
+
 
         [SlashCommand("removerolefromtier", "Remove a role from a tier")]
-        public async Task RemoveRoleFromTier(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier, [Option("Role", "Role to update")] DiscordRole role)
+        public async Task RemoveRoleFromTier(InteractionContext ctx, [Option("Tier", "Tier to update")] string tier,
+            [Option("Role", "Role to update")] DiscordRole role)
         {
             ulong guildId = ctx.Guild.Id;
             string roleName = role.Name;
-            
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Updating Tier")
-                    .WithDescription("Standby")
-                    .WithColor(DiscordColor.Orange)
-                ));
 
-            try
-            {
-                var updateTier = await _repo.RemoveRoleFromTier(tier, guildId, roleName);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse))
+            );
 
-                if (!updateTier)
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Error")
-                            .WithDescription("Tier does not exist")
-                            .WithColor(DiscordColor.Red)
-                        ));
-                }
-                else
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Tier Updated")
-                            .WithDescription("Tier Successfully Updated")
-                            .WithColor(DiscordColor.Green)
-                        ));
-                }
-            }
-            catch (Exception e)
+
+            var updateTier = await _repo.RemoveRoleFromTier(tier, guildId, roleName);
+
+            if (!updateTier)
             {
+                _title = "Error";
+                _description = "Tier does not exist";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                    ));
+            }
+            else
+            {
+                _title = "Success";
+                _description = "Tier successfully updated";
+                _color = DiscordColor.Green;
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                     ));
             }
         }
+
 
         [SlashCommand("tierlist", "List of all tiers")]
         public Task GetTierListCommand(InteractionContext ctx)
         {
             ulong guildId = ctx.Guild.Id;
 
-            try
+            List<TierRole> tierList = _repo.GetAllTiers(guildId);
+
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle("Tier List")
+                .WithColor(DiscordColor.Green);
+
+            foreach (var tier in tierList)
             {
-                List<TierRole> tierList = _repo.GetAllTiers(guildId);
-
-                var embed = new DiscordEmbedBuilder()
-                    .WithTitle("Tier List")
-                    .WithColor(DiscordColor.Green);
-
-                foreach (var tier in tierList)
+                var getRoles = _repo.GetRolesFromTier(tier.Id, guildId);
+                string roles = "";
+                foreach (var role in getRoles)
                 {
-                    var getRoles = _repo.GetRolesFromTier(tier.Id, guildId);
-                    string roles = "";
-                    foreach (var role in getRoles)
-                    {
-                        roles += $"{role}\n";
-                    }
-                    embed.AddField($"Tier {tier.TierName}", roles);
+                    roles += $"{role}\n";
                 }
 
-                return ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                embed.AddField($"Tier {tier.TierName}", roles);
+            }
+
+            return ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
                     .AddEmbed(embed));
-            }
-            catch (Exception e)
-            {
-                return ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
-                    ));
-            }
         }
 
         [SlashCommand("deletetier", "delete a tier")]
@@ -197,26 +161,24 @@ namespace RaidBot.Commands
         {
             ulong guildId = ctx.Guild.Id;
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Deleting...")
-                        .WithDescription("Stand by")
-                        .WithColor(DiscordColor.Orange)));
-            try
-            {
-                var deleteTier = _repo.DeleteTier(tier, guildId);
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
 
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder().WithTitle("Success")
-                    .WithDescription($"Tier {tier} deleted")
-                    .WithColor(DiscordColor.Green)));
-            } catch(Exception e)
+            var deleteTier = await _repo.DeleteTier(tier, guildId);
+            if (!deleteTier)
             {
+                _title = "Error";
+                _description = "Something went wrong, please ensure the tier you are trying to delete exists";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                   .AddEmbed(new DiscordEmbedBuilder().WithTitle("Error")
-                   .WithDescription($"Error: {e}")
-                   .WithColor(DiscordColor.Red)));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
             }
+            _title = "Success";
+            _description = $"Tier {tier} deleted";
+            _color = DiscordColor.Green;
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
         }
     }
 }

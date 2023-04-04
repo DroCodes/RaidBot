@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RaidBot.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class ModifiedEntityClasses : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -204,24 +204,18 @@ namespace RaidBot.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AssignedTierRoleId = table.Column<int>(type: "integer", nullable: false),
-                    RoleName = table.Column<string>(type: "text", nullable: true),
-                    TierRoleId = table.Column<int>(type: "integer", nullable: true)
+                    TierRoleId = table.Column<int>(type: "integer", nullable: false),
+                    RoleName = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AssignedTierRoles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AssignedTierRoles_TierRoles_AssignedTierRoleId",
-                        column: x => x.AssignedTierRoleId,
-                        principalTable: "TierRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_AssignedTierRoles_TierRoles_TierRoleId",
                         column: x => x.TierRoleId,
                         principalTable: "TierRoles",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -325,11 +319,6 @@ namespace RaidBot.Data.Migrations
                 name: "IX_ActiveRaids_GuildId",
                 table: "ActiveRaids",
                 column: "GuildId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AssignedTierRoles_AssignedTierRoleId",
-                table: "AssignedTierRoles",
-                column: "AssignedTierRoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssignedTierRoles_TierRoleId",
