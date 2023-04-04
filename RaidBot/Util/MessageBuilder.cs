@@ -5,19 +5,24 @@ namespace RaidBot.Util;
 
 public class MessageBuilder : ApplicationCommandModule, IMessageBuilder
 {
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public DiscordColor Color { get; set; }
-
-    public DiscordEmbedBuilder EmbedBuilder()
+    public DiscordEmbedBuilder EmbedBuilder(string title = null, string description = null, DiscordColor? color = null)
     {
-        var embed = new DiscordEmbedBuilder
+        var embed = new DiscordEmbedBuilder();
+        if (title != null)
         {
-            Title = Title,
-            Description = Description,
-            Color = Color
-        };
-
+            embed.Title = title;
+        }
+    
+        if (description != null)
+        {
+            embed.Description = description;
+        }
+    
+        if (color != null)
+        {
+            embed.Color = color.Value;
+        }
         return embed;
     }
+
 }

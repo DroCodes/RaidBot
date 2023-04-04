@@ -58,11 +58,11 @@ namespace RaidBot.Data
                 .WithMany()
                 .HasForeignKey(t => t.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             modelBuilder.Entity<AssignedTierRoles>()
                 .HasOne<TierRole>(t => t.TierRole)
-                .WithMany()
-                .HasForeignKey(r => r.AssignedTierRoleId)
+                .WithMany(t => t.Roles)
+                .HasForeignKey(r => r.TierRoleId)
                 .OnDelete(DeleteBehavior.Cascade);
             // end of TierRole relationship
             // beggniing of guild member relations

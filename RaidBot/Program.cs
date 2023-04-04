@@ -11,6 +11,7 @@ using RaidBot.Data;
 using RaidBot.Data.Repository;
 using RaidBot.Util;
 using Serilog;
+using ILogger = RaidBot.Util.ILogger;
 
 public class Program
 {
@@ -50,6 +51,7 @@ public class Program
             .AddSingleton<IRaidSettingsRepository, RaidSettingsRepository>()
             .AddSingleton<ITierSettingsRepository, TierSettingsRepository>()
             .AddSingleton<IMessageBuilder, MessageBuilder>()
+            .AddSingleton<ILogger, Logger>()
             .AddDbContext<DataContext>(options => options.UseNpgsql(connectionString))
             .BuildServiceProvider();
 
