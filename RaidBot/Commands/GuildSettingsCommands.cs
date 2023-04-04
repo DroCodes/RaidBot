@@ -8,12 +8,12 @@ namespace RaidBot.Commands
 {
     public class GuildSettingsCommands : ApplicationCommandModule
     {
-        private static IGuildSettingsRepository? _guildSettings;
+        private readonly IGuildSettingsRepository? _guildSettings;
         private readonly IMessageBuilder _messageBuilder;
-        public string InitialResponse = "Thinking";
-        public string Title;
-        public string Description;
-        public DiscordColor Color;
+        private const string _initialResponse = "Thinking";
+        private string _title;
+        private string _description;
+        private DiscordColor _color;
 
         public GuildSettingsCommands(IGuildSettingsRepository guildSettingsRepository, IMessageBuilder MessageBuilder)
         {
@@ -28,26 +28,26 @@ namespace RaidBot.Commands
             
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
 
             if (!await _guildSettings.AddGuildId(guildId))
             {
-                Title = "Error";
-                Description = "Guild Id has already been set";
-                Color = DiscordColor.Red;
+                _title = "Error";
+                _description = "Guild Id has already been set";
+                _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description,
-                        Color)));
+                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                        _color)));
             }
             else
             {
-                Title = "Success";
-                Description = $"Guild Id set to {guildId}";
-                Color = DiscordColor.Green;
+                _title = "Success";
+                _description = $"Guild Id set to {guildId}";
+                _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(Title, Description, Color)
+                    _messageBuilder.EmbedBuilder(_title, _description, _color)
                 ));
             }
         } // End SetGuildIdCommand
@@ -61,39 +61,39 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
 
             if (channel.Type == ChannelType.Category)
             {
-                Title = "Error";
-                Description = "The channel is not a valid channel";
-                Color = DiscordColor.Red;
+                _title = "Error";
+                _description = "The channel is not a valid channel";
+                _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description,
-                        Color)));
+                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                        _color)));
                 return;
             }
 
             if (!await _guildSettings.SetRaidChannelId(guildId, channel.Id))
             {
-                Title = "Error";
-                Description =
+                _title = "Error";
+                _description =
                     "Something went wrong, please ensure the guildId has been set with the command /checksettings";
-                Color = DiscordColor.Red;
+                _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(Title, Description, Color)
+                    _messageBuilder.EmbedBuilder(_title, _description, _color)
                 ));
             }
             else
             {
-                Title = "Success";
-                Description = $"Set raid channel to {channel}";
-                Color = DiscordColor.Green;
+                _title = "Success";
+                _description = $"Set raid channel to {channel}";
+                _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(Title, Description, Color)
+                    _messageBuilder.EmbedBuilder(_title, _description, _color)
                 ));
             }
         } // End SetRaidChannelCommand
@@ -108,39 +108,39 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
 
             if (category.Type != ChannelType.Category)
             {
-                Title = "Error";
-                Description = $"This channel is not a category {category}";
-                Color = DiscordColor.Red;
+                _title = "Error";
+                _description = $"This channel is not a category {category}";
+                _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description,
-                        Color)));
+                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                        _color)));
                 return;
             }
 
             if (!await _guildSettings.SetRaidChannelGroup(guildId, channelCatId))
             {
-                Title = "Error";
-                Description =
+                _title = "Error";
+                _description =
                     "Something went wrong, please make sure that the guild id has been set, if the problem persists contact an Admin. Thank you";
-                Color = DiscordColor.Red;
+                _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description,
-                        Color)));
+                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                        _color)));
             }
             else
             {
-                Title = "Success";
-                Description = $"Category set to {category}";
-                Color = DiscordColor.Green;
+                _title = "Success";
+                _description = $"Category set to {category}";
+                _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(Title, Description, Color)));
+                    _messageBuilder.EmbedBuilder(_title, _description, _color)));
             }
         } // end SetChannelGroupCommands
 
@@ -152,34 +152,34 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
 
             var checkGuild = await _guildSettings.CheckGuildSettings(guildId);
 
             if (checkGuild == null)
             {
-                Title = "Error";
-                Description =
+                _title = "Error";
+                _description =
                     $"This guild doesn't exist in my DB, please manually set the guild Id by using the command /setguildid, thank you";
-                Color = DiscordColor.Red;
+                _color = DiscordColor.Red;
 
                 var errorTitle = "Error";
 
-                ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description, Color)));
+                ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
                 return;
             }
 
             var guildChannelName = guildChannels.FirstOrDefault(x => x.Key == checkGuild[1]);
             var guildCategoryName = guildChannels.FirstOrDefault(x => x.Key == checkGuild[2]);
 
-            Title = "Success";
-            Description =
+            _title = "Success";
+            _description =
                 $"Guild Id: {checkGuild[0]}\n" +
                 $"Raid Channel Id: {guildChannelName.Value}\n" +
                 $"Raid Channel Group: {guildCategoryName.Value}";
-            Color = DiscordColor.Green;
+            _color = DiscordColor.Green;
 
-            ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(Title, Description, Color)));
+            ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
         } // end CheckGuildSettingsCommand
     }
 }
