@@ -2,15 +2,23 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using RaidBot.Data.Repository;
+using RaidBot.Util;
 
 namespace RaidBot.Commands.RaidCommands
 {
     public class RaidCreationCommands : ApplicationCommandModule
     {
-        private static IRaidSettingsRepository? _repo;
-        public RaidCreationCommands(IRaidSettingsRepository repo)
+        private readonly IRaidSettingsRepository? _repo;
+        private readonly IMessageBuilder _messageBuilder;
+        private const string _initialResponse = "Thinking";
+        private string _title;
+        private string _description;
+        private DiscordColor _color;
+
+        public RaidCreationCommands(IRaidSettingsRepository repo, IMessageBuilder messageBuilder)
         {
             _repo = repo;
+            _messageBuilder = messageBuilder;
         }
 
         [SlashCommand("create", "Create a raid")]
@@ -20,40 +28,28 @@ namespace RaidBot.Commands.RaidCommands
             // send the user a private message
             var dm = await ctx.Member.CreateDmChannelAsync();
 
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Creating Raid")
-                    .WithDescription("Standby for a DM from me")
-                    .WithColor(DiscordColor.Orange)
-                ));
-            try
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    ));
+
+            if (!await _repo.SaveNewRaid(name, guildId))
             {
-                if (!await _repo.SaveNewRaid(name, guildId))
-                {
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Error")
-                            .WithDescription("Raid already exists")
-                            .WithColor(DiscordColor.Red)
-                        ));
-                }
-            }
-            catch (Exception e)
-            {
+                _title = "Error";
+                _description = "This raid already exists";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
+                    .AddEmbed(_messageBuilder.EmbedBuilder()
                     ));
             }
+
             await dm.SendMessageAsync("Hello, world!");
 
+            _title = "Success";
+            _description = "Raid creation started, continue in a private message with me";
+            _color = DiscordColor.Green;
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Raid Created")
-                    .WithDescription("Raid creation is continued in a pivate message with me")
-                    .WithColor(DiscordColor.Green)
+                .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                 ));
         }
 
@@ -61,40 +57,28 @@ namespace RaidBot.Commands.RaidCommands
         public async Task DeleteRaid(InteractionContext ctx, [Option("raid-name", "The name of the raid")] string name)
         {
             var guildId = ctx.Guild.Id;
-            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Deleting Raid")
-                    .WithDescription("Standby")
-                    .WithColor(DiscordColor.Orange)
-                ));
-            try
-            {
+            
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    ));
+
                 if (!await _repo.DeleteRaid(name, guildId))
                 {
+                    _title = "Error";
+                    _description = "Something went wrong deleting {name}";
+                    _color = DiscordColor.Red;
                     await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(new DiscordEmbedBuilder()
-                            .WithTitle("Error")
-                            .WithDescription("Raid does not exist")
-                            .WithColor(DiscordColor.Red)
+                        .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                         ));
                 }
-            }
-            catch (Exception e)
-            {
-                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithTitle("Error")
-                        .WithDescription(e.Message)
-                        .WithColor(DiscordColor.Red)
-                    ));
-            }
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                .AddEmbed(new DiscordEmbedBuilder()
-                    .WithTitle("Raid Deleted")
-                    .WithDescription("Raid Successfully Deleted")
-                    .WithColor(DiscordColor.Green)
-                ));
+                _title = "Success";
+                _description = "Raid Successfully deleted";
+                _color = DiscordColor.Green;
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                        .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                        ));
         }
     }
 }
