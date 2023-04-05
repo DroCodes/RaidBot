@@ -12,8 +12,8 @@ using RaidBot.Data;
 namespace RaidBot.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230404025154_ModifiedEntityClasses")]
-    partial class ModifiedEntityClasses
+    [Migration("20230405050113_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -144,16 +144,16 @@ namespace RaidBot.Data.Migrations
 
             modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
 
-                    b.HasKey("id");
+                    b.HasKey("Id");
 
                     b.HasIndex("GuildId");
 
@@ -232,10 +232,10 @@ namespace RaidBot.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ActiveRaidsid")
+                    b.Property<int>("ActiveRaidId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime?>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("GuildId")
@@ -244,23 +244,19 @@ namespace RaidBot.Data.Migrations
                     b.Property<string>("Info")
                         .HasColumnType("text");
 
-                    b.Property<int>("RaidId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("RaidName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("TierRole")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Time")
+                    b.Property<DateTime?>("Time")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActiveRaidsid");
-
-                    b.HasIndex("RaidId");
+                    b.HasIndex("ActiveRaidId");
 
                     b.ToTable("RaidSettings");
                 });
@@ -433,7 +429,7 @@ namespace RaidBot.Data.Migrations
             modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
                 {
                     b.HasOne("RaidBot.entities.GuildSettings", "GuildSettings")
-                        .WithMany()
+                        .WithMany("ActiveRaids")
                         .HasForeignKey("GuildId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -471,13 +467,9 @@ namespace RaidBot.Data.Migrations
 
             modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>
                 {
-                    b.HasOne("RaidBot.entities.ActiveRaids", null)
-                        .WithMany("ActiveRaidsList")
-                        .HasForeignKey("ActiveRaidsid");
-
                     b.HasOne("RaidBot.entities.ActiveRaids", "ActiveRaids")
-                        .WithMany()
-                        .HasForeignKey("RaidId")
+                        .WithMany("Raids")
+                        .HasForeignKey("ActiveRaidId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -565,7 +557,12 @@ namespace RaidBot.Data.Migrations
 
             modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
                 {
-                    b.Navigation("ActiveRaidsList");
+                    b.Navigation("Raids");
+                });
+
+            modelBuilder.Entity("RaidBot.entities.GuildSettings", b =>
+                {
+                    b.Navigation("ActiveRaids");
                 });
 
             modelBuilder.Entity("RaidBot.entities.TierRole", b =>

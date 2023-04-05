@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RaidBot.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ModifiedEntityClasses : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -84,13 +84,13 @@ namespace RaidBot.Data.Migrations
                 name: "ActiveRaids",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActiveRaids", x => x.id);
+                    table.PrimaryKey("PK_ActiveRaids", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ActiveRaids_GuildSettings_GuildId",
                         column: x => x.GuildId,
@@ -151,28 +151,22 @@ namespace RaidBot.Data.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RaidName = table.Column<string>(type: "text", nullable: false),
                     GuildId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    RaidId = table.Column<int>(type: "integer", nullable: false),
-                    RaidName = table.Column<string>(type: "text", nullable: true),
                     TierRole = table.Column<string>(type: "text", nullable: true),
                     Info = table.Column<string>(type: "text", nullable: true),
-                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ActiveRaidsid = table.Column<int>(type: "integer", nullable: true)
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ActiveRaidId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RaidSettings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RaidSettings_ActiveRaids_ActiveRaidsid",
-                        column: x => x.ActiveRaidsid,
+                        name: "FK_RaidSettings_ActiveRaids_ActiveRaidId",
+                        column: x => x.ActiveRaidId,
                         principalTable: "ActiveRaids",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_RaidSettings_ActiveRaids_RaidId",
-                        column: x => x.RaidId,
-                        principalTable: "ActiveRaids",
-                        principalColumn: "id",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -341,14 +335,9 @@ namespace RaidBot.Data.Migrations
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RaidSettings_ActiveRaidsid",
+                name: "IX_RaidSettings_ActiveRaidId",
                 table: "RaidSettings",
-                column: "ActiveRaidsid");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RaidSettings_RaidId",
-                table: "RaidSettings",
-                column: "RaidId");
+                column: "ActiveRaidId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RaidStatsByRoles_RaidHistoryId",

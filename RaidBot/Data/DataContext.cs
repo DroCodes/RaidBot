@@ -28,17 +28,43 @@ namespace RaidBot.Data
         {
             modelBuilder.Entity<GuildSettings>()
                 .HasKey(g => g.GuildId);
+            
+            modelBuilder.Entity<GuildSettings>()
+                .HasMany(g => g.ActiveRaids!)
+                .WithOne(a => a.GuildSettings!)
+                .HasForeignKey(a => a.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
             // start of ActivityRaids table relations
             modelBuilder.Entity<ActiveRaids>()
-                .HasOne(a => a.GuildSettings)
-                .WithMany()
-                .HasForeignKey(x => x.GuildId)
+                .HasKey(a => a.Id);
+
+            modelBuilder.Entity<ActiveRaids>()
+                .HasOne(a => a.GuildSettings!)
+                .WithMany(g => g.ActiveRaids!)
+                .HasForeignKey(a => a.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<RaidSettings>()
+                .HasKey(r => r.Id);
 
             modelBuilder.Entity<RaidSettings>()
-                .HasOne<ActiveRaids>(r => r.ActiveRaids)
-                .WithMany()
+                .HasOne<ActiveRaids>(t => t.ActiveRaids)
+                .WithMany(t => t.Raids)
+                .HasForeignKey(r => r.ActiveRaidId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // modelBuilder.Entity<ActiveRaids>()
+            //     .HasOne(a => a.GuildSettings)
+            //     .WithMany()
+            //     .HasForeignKey(x => x.GuildId)
+            //     .OnDelete(DeleteBehavior.Cascade);
+            //
+            // modelBuilder.Entity<RaidSettings>()
+            //     .HasOne<ActiveRaids>(t => t.ActiveRaids)
+            //     .WithMany(t => t.Raids)
+            //     .HasForeignKey(r => r.RaidId)
+            //     .OnDelete(DeleteBehavior.Cascade);
+
             
             modelBuilder.Entity<Roles>()
                 .HasOne<RaidSettings>(r => r.RaidSettings)

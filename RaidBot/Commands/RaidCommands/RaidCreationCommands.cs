@@ -10,9 +10,9 @@ namespace RaidBot.Commands.RaidCommands
     {
         private readonly IRaidSettingsRepository? _repo;
         private readonly IMessageBuilder _messageBuilder;
-        private const string _initialResponse = "Thinking";
-        private string _title;
-        private string _description;
+        private const string InitialResponse = "Thinking";
+        private string? _title;
+        private string? _description;
         private DiscordColor _color;
 
         public RaidCreationCommands(IRaidSettingsRepository repo, IMessageBuilder messageBuilder)
@@ -21,7 +21,7 @@ namespace RaidBot.Commands.RaidCommands
             _messageBuilder = messageBuilder;
         }
 
-        [SlashCommand("create", "Create a raid")]
+        [SlashCommand("createraid", "Create a raid")]
         public async Task CreateRaid(InteractionContext ctx, [Option("raid-name", "The name of the raid")] string name)
         {
             var guildId = ctx.Guild.Id;
@@ -30,17 +30,18 @@ namespace RaidBot.Commands.RaidCommands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
-
+            
             if (!await _repo.SaveNewRaid(name, guildId))
             {
                 _title = "Error";
-                _description = "This raid already exists";
+                _description = "There was a problem creating the raid.";
                 _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                     ));
+                return;
             }
 
             await dm.SendMessageAsync("Hello, world!");
@@ -53,32 +54,45 @@ namespace RaidBot.Commands.RaidCommands
                 ));
         }
 
-        [SlashCommand("delete", "Delete a raid")]
+        [SlashCommand("deleteraid", "Delete a raid")]
         public async Task DeleteRaid(InteractionContext ctx, [Option("raid-name", "The name of the raid")] string name)
         {
             var guildId = ctx.Guild.Id;
-            
+
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)
+                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
 
-                if (!await _repo.DeleteRaid(name, guildId))
-                {
-                    _title = "Error";
-                    _description = "Something went wrong deleting {name}";
-                    _color = DiscordColor.Red;
-                    await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
-                        ));
-                }
-
-                _title = "Success";
-                _description = "Raid Successfully deleted";
-                _color = DiscordColor.Green;
+            if (!await _repo?.DeleteRaid(name, guildId)!)
+            {
+                _title = "Error";
+                _description = "Something went wrong deleting {name}";
+                _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                        .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
-                        ));
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                    ));
+            }
+
+            _title = "Success";
+            _description = "Raid Successfully deleted";
+            _color = DiscordColor.Green;
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                ));
+        }
+
+        [SlashCommand("info", "set the info for the raid")]
+        public async Task InfoCommand(InteractionContext ctx,
+            [Option("raidname", "The name of the raid")]
+            string raidName, [Option("Info", "Info about the raid")] string info)
+        {
+            var guildId = ctx.Guild.Id;
+
+            await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+                new DiscordInteractionResponseBuilder().AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder("test")));
         }
     }
 }

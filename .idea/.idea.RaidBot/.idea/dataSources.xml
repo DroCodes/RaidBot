@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="RaidBotDB" uuid="421f881b-7788-43cb-9123-711c200fc006">
+    <data-source source="LOCAL" name="RaidBot" uuid="2a8bf27a-55d8-43eb-8167-81b5fee0f4fb">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
