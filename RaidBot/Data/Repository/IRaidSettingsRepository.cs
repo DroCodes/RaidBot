@@ -4,5 +4,6 @@ namespace RaidBot.Data.Repository
     {
         Task<bool> SaveNewRaid(string raidName, ulong guildId);
         Task<bool> DeleteRaid(string raidName, ulong guildId);
+        Task<bool> SaveRaidInfo(ulong guildId, string raidName, string info);
     }
 }
