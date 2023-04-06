@@ -20,16 +20,6 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var existingGuildRaid = await _context.ActiveRaids
-                    .FirstOrDefaultAsync(x => x.GuildId == guildId);
-                // Console.WriteLine("test");
-
-                if (existingGuildRaid != null)
-                {
-                    // Guild already has an active raid
-                    return false;
-                }
-
                 var existingRaid = await _context.RaidSettings
                     .FirstOrDefaultAsync(x => x.RaidName == raidName);
 
@@ -52,11 +42,11 @@ namespace RaidBot.Data.Repository
                     GuildId = guildId,
                     Raids = new List<RaidSettings>()
                     {
-                       new()
-                       {
-                           RaidName = raidName,
-                           GuildId = guildId
-                       }
+                        new()
+                        {
+                            RaidName = raidName,
+                            GuildId = guildId
+                        }
                     }
                 };
 
@@ -75,19 +65,21 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var activeRaid = _context.ActiveRaids.FirstOrDefault(x => x.GuildId == guildId);
-
-                if (activeRaid == null)
-                {
-                    return false;
-                }
-                
-                var raid = _context.RaidSettings.FirstOrDefault(xv => xv.RaidName == raidName);
+                var raid = _context.RaidSettings.FirstOrDefault(x => x.RaidName == raidName);
 
                 if (raid == null)
                 {
                     return false;
                 }
+                
+                var activeRaid = _context.ActiveRaids.FirstOrDefault(x => x.Id == raid.ActiveRaidId);
+
+                if (activeRaid == null)
+                {
+                    return false;
+                }
+
+
 
                 _context.ActiveRaids.Remove(activeRaid);
                 return await _context.SaveChangesAsync() > 0;
@@ -99,9 +91,51 @@ namespace RaidBot.Data.Repository
             }
         }
 
-        public Task<bool> SaveRaidInfo(ulong guildId, string raidName, string info)
+        public async Task<List<RaidSettings>>? GetActiveRaids(ulong guildId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var getRaidList = _context.RaidSettings.Where(x => x.GuildId == guildId).OrderBy(x => x.RaidName)
+                    .ToList();
+
+                if (getRaidList == null) return null;
+
+                return getRaidList;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "something went wrong retrieving the list of raids");
+                return null;
+            }
+        }
+
+        public async Task<bool> SaveRaidInfo(string raidName, string info)
+        {
+            try
+            {
+                var findRaidWithRaidName = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+
+                if (findRaidWithRaidName == null)
+                {
+                    return false;
+                }
+
+                var findActiveRaids =
+                    await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaidWithRaidName.ActiveRaidId);
+
+                if (findActiveRaids == null)
+                {
+                    return false;
+                }
+
+                findRaidWithRaidName.Info = info;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error adding info");
+                return false;
+            }
         }
     }
 }

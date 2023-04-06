@@ -129,7 +129,7 @@ namespace RaidBot.Commands
 
 
         [SlashCommand("tierlist", "List of all tiers")]
-        public Task GetTierListCommand(InteractionContext ctx)
+        public async Task GetTierListCommand(InteractionContext ctx)
         {
             ulong guildId = ctx.Guild.Id;
 
@@ -151,7 +151,7 @@ namespace RaidBot.Commands
                 embed.AddField($"Tier {tier.TierName}", roles);
             }
 
-            return ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+            ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
                     .AddEmbed(embed));
         }
