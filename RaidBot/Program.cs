@@ -64,6 +64,7 @@ public class Program
         slashCommands.RegisterCommands<GuildSettingsCommands>();
         slashCommands.RegisterCommands<RaidCreationCommands>();
         slashCommands.RegisterCommands<TierSettingsCommands>();
+        slashCommands.RegisterCommands<RaidSettingsCommands>();
 
         // Connect to the gateway
         await client.ConnectAsync();
