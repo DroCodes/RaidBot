@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace RaidBot.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -156,7 +156,7 @@ namespace RaidBot.Data.Migrations
                     TierRole = table.Column<string>(type: "text", nullable: true),
                     Info = table.Column<string>(type: "text", nullable: true),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Time = table.Column<TimeSpan>(type: "interval", nullable: true),
                     ActiveRaidId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

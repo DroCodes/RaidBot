@@ -1,5 +1,6 @@
 using System.Runtime.Intrinsics.X86;
 using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
 using RaidBot.entities;
 using RaidBot.Util;
 
@@ -45,7 +46,7 @@ namespace RaidBot.Data.Repository
                         new()
                         {
                             RaidName = raidName,
-                            GuildId = guildId
+                            GuildId = guildId,
                         }
                     }
                 };
@@ -71,14 +72,13 @@ namespace RaidBot.Data.Repository
                 {
                     return false;
                 }
-                
+
                 var activeRaid = _context.ActiveRaids.FirstOrDefault(x => x.Id == raid.ActiveRaidId);
 
                 if (activeRaid == null)
                 {
                     return false;
                 }
-
 
 
                 _context.ActiveRaids.Remove(activeRaid);
@@ -135,6 +135,150 @@ namespace RaidBot.Data.Repository
             {
                 _logger.LogError(e, "error adding info");
                 return false;
+            }
+        }
+
+        public async Task<bool> SaveRaidTier(string raidName, string tier)
+        {
+            try
+            {
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+
+                if (findRaid == null)
+                {
+                    return false;
+                }
+
+                var findTier = await _context.TierRoles.FirstOrDefaultAsync(x => x.TierName == tier);
+
+                if (findTier == null)
+                {
+                    return false;
+                }
+
+                var findActiveRaid = await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaid.ActiveRaidId);
+
+                if (findActiveRaid == null)
+                {
+                    return false;
+                }
+
+                findRaid.TierRole = tier;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "there was an issue saving the tier");
+                return false;
+            }
+        }
+
+        public async Task<bool> SaveDateTime(string raidName, DateTime date)
+        {
+            try
+            {
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+                if (findRaid == null) return false;
+
+                var findActiveRaid = await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaid.ActiveRaidId);
+
+                if (findActiveRaid == null) return false;
+
+                findRaid.Date = date.Date;
+                findRaid.Time = date.TimeOfDay;
+
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "error saving the date");
+                return false;
+            }
+        }
+
+        public async Task<bool> SetRolesForRaid(string raidName, int[] roles)
+        {
+            try
+            {
+                var raid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+
+                if (raid == null)
+                {
+                    return false;
+                }
+
+                var findRaid = _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == raid.ActiveRaidId);
+
+                if (findRaid == null)
+                {
+                    return false;
+                }
+
+                int tank = roles[0];
+                int healer = roles[1];
+                int dps = roles[2];
+
+                RaidRoles newRoles = new RaidRoles()
+                {
+                    TankRole = tank,
+                    HealerRole = healer,
+                    DpsRole = dps,
+                    RoleSettingsId = raid.Id // set the foreign key property
+                };
+
+                raid.Roles = newRoles;
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an error saving the roles");
+                return false;
+            }
+        }
+
+        public async Task<RaidSettings> GetStatus(string raidName)
+        {
+            try
+            {
+                var getRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+
+                if (getRaid == null)
+                {
+                    return null;
+                }
+
+                var raidStatus = _context.ActiveRaids.FirstOrDefault(x => x.Id == getRaid.ActiveRaidId);
+
+                if (raidStatus == null)
+                {
+                    return null;
+                }
+
+                DateTime? date = getRaid.Date;
+                TimeSpan? time = getRaid.Time;
+
+                var combinedDateTime = date + time;
+
+                if (combinedDateTime == null)
+                {
+                    var newDate = new DateTime(2000, 01, 01);
+                    combinedDateTime = newDate;
+                }
+
+                RaidSettings raidStats = new RaidSettings()
+                {
+                    RaidName = getRaid.RaidName,
+                    Info = getRaid.Info,
+                    TierRole = getRaid.TierRole,
+                    Date = combinedDateTime
+                };
+
+                return raidStats;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
             }
         }
     }

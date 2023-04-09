@@ -53,6 +53,14 @@ namespace RaidBot.Data
                 .HasForeignKey(r => r.ActiveRaidId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<RaidRoles>()
+                .HasKey(r => r.Id);
+
+            modelBuilder.Entity<RaidRoles>()
+                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .WithOne()
+                .HasForeignKey<RaidRoles>(r => r.RoleSettingsId);
+
             // modelBuilder.Entity<ActiveRaids>()
             //     .HasOne(a => a.GuildSettings)
             //     .WithMany()
