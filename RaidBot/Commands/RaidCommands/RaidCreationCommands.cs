@@ -25,6 +25,7 @@ namespace RaidBot.Commands.RaidCommands
         public async Task CreateRaid(InteractionContext ctx, [Option("raid-name", "The name of the raid")] string name)
         {
             var guildId = ctx.Guild.Id;
+            string raidName = name.Replace(" ", "-").ToLower();
             // send the user a private message
             var dm = await ctx.Member.CreateDmChannelAsync();
 
@@ -33,7 +34,8 @@ namespace RaidBot.Commands.RaidCommands
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
 
-            if (!await _repo.SaveNewRaid(name, guildId))
+
+            if (!await _repo.SaveNewRaid(raidName, guildId))
             {
                 _title = "Error";
                 _description = "There was a problem creating the raid.";
@@ -48,7 +50,7 @@ namespace RaidBot.Commands.RaidCommands
                                       "type /info /roles /tier /date /time");
 
             _title = "Success";
-            _description = "Raid creation started, continue in a private message with me";
+            _description = $"Raid creation started for {raidName}, continue in a private message with me";
             _color = DiscordColor.Green;
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)

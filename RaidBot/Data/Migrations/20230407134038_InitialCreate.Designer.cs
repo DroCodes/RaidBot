@@ -12,8 +12,8 @@ using RaidBot.Data;
 namespace RaidBot.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230405050113_Initial")]
-    partial class Initial
+    [Migration("20230407134038_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -251,8 +251,8 @@ namespace RaidBot.Data.Migrations
                     b.Property<string>("TierRole")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("Time")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<TimeSpan?>("Time")
+                        .HasColumnType("interval");
 
                     b.HasKey("Id");
 
