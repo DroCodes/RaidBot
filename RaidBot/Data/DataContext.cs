@@ -12,7 +12,6 @@ namespace RaidBot.Data
         }
 
         public DbSet<GuildSettings> GuildSettings { get; set; }
-        public DbSet<ActiveRaids> ActiveRaids { get; set; }
         public DbSet<RaidSettings> RaidSettings { get; set; }
         public DbSet<GuildMember> GuildMember { get; set; }
         public DbSet<TierRole> TierRoles { get; set; }
@@ -20,8 +19,11 @@ namespace RaidBot.Data
         public DbSet<UserRaidHistory> UserRaidHistories { get; set; }
         public DbSet<RaidStatsByRole> RaidStatsByRoles { get; set; }
         public DbSet<RaidStatsByTier> RaidStatsByTiers { get; set; }
-        public DbSet<Roles> Roles { get; set; }
         public DbSet<SignUpEmoji> SignUpEmojis { get; set; }
+        public DbSet<RaidRoles> RaidRoles { get; set; }
+        public DbSet<Roster> Rosters { get; set; }
+        public OverFlowRoster OverFlow { get; set; }
+        public DbSet<BackUpRoster> BackUp { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -30,27 +32,18 @@ namespace RaidBot.Data
                 .HasKey(g => g.GuildId);
             
             modelBuilder.Entity<GuildSettings>()
-                .HasMany(g => g.ActiveRaids!)
-                .WithOne(a => a.GuildSettings!)
+                .HasMany(g => g.RaidList)
+                .WithOne(a => a.GuildSettings)
                 .HasForeignKey(a => a.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
-            // start of ActivityRaids table relations
-            modelBuilder.Entity<ActiveRaids>()
-                .HasKey(a => a.Id);
 
-            modelBuilder.Entity<ActiveRaids>()
-                .HasOne(a => a.GuildSettings!)
-                .WithMany(g => g.ActiveRaids!)
-                .HasForeignKey(a => a.GuildId)
-                .OnDelete(DeleteBehavior.Cascade);
-            
             modelBuilder.Entity<RaidSettings>()
                 .HasKey(r => r.Id);
 
             modelBuilder.Entity<RaidSettings>()
-                .HasOne<ActiveRaids>(t => t.ActiveRaids)
-                .WithMany(t => t.Raids)
-                .HasForeignKey(r => r.ActiveRaidId)
+                .HasOne<GuildSettings>(t => t.GuildSettings)
+                .WithMany(t => t.RaidList)
+                .HasForeignKey(r => r.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<RaidRoles>()
@@ -61,29 +54,28 @@ namespace RaidBot.Data
                 .WithOne()
                 .HasForeignKey<RaidRoles>(r => r.RoleSettingsId);
 
-            // modelBuilder.Entity<ActiveRaids>()
-            //     .HasOne(a => a.GuildSettings)
-            //     .WithMany()
-            //     .HasForeignKey(x => x.GuildId)
-            //     .OnDelete(DeleteBehavior.Cascade);
-            //
-            // modelBuilder.Entity<RaidSettings>()
-            //     .HasOne<ActiveRaids>(t => t.ActiveRaids)
-            //     .WithMany(t => t.Raids)
-            //     .HasForeignKey(r => r.RaidId)
-            //     .OnDelete(DeleteBehavior.Cascade);
-
-            
-            modelBuilder.Entity<Roles>()
+            modelBuilder.Entity<Roster>()
                 .HasOne<RaidSettings>(r => r.RaidSettings)
                 .WithMany()
-                .HasForeignKey(r => r.RaidSettingsId)
+                .HasForeignKey(r => r.RosterSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<OverFlowRoster>()
+                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .WithMany()
+                .HasForeignKey(r => r.OverflowSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<BackUpRoster>()
+                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .WithMany()
+                .HasForeignKey(r => r.BackUpSettingsId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<SignUpEmoji>()
-                .HasOne<RaidSettings>(s => s.RaidSettings)
+                .HasOne<GuildSettings>(s => s.GuildSettings)
                 .WithMany()
-                .HasForeignKey(s => s.RaidSettingsId)
+                .HasForeignKey(s => s.GuildSettingsId)
                 .OnDelete(DeleteBehavior.Cascade);
             // end of ActivityRaids relationship
             // Beginning of Tier Role relationships

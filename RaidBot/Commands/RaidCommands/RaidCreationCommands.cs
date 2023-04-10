@@ -34,8 +34,9 @@ namespace RaidBot.Commands.RaidCommands
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
 
+            var saveRaid = await _repo?.SaveNewRaid(raidName, guildId)!;
 
-            if (!await _repo.SaveNewRaid(raidName, guildId))
+            if (!saveRaid)
             {
                 _title = "Error";
                 _description = "There was a problem creating the raid.";
@@ -66,8 +67,10 @@ namespace RaidBot.Commands.RaidCommands
                 new DiscordInteractionResponseBuilder()
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
-
-            if (!await _repo?.DeleteRaid(name, guildId)!)
+            
+            var deleteRaid = await _repo?.DeleteRaid(name, guildId)!;
+            
+            if (!deleteRaid)
             {
                 _title = "Error";
                 _description = $"Something went wrong deleting {name}";
@@ -95,7 +98,7 @@ namespace RaidBot.Commands.RaidCommands
                 new DiscordInteractionResponseBuilder()
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
-            var getRaids = await _repo.GetActiveRaids(guildId);
+            var getRaids = _repo?.GetActiveRaids(guildId);
 
             if (getRaids == null)
             {
@@ -112,15 +115,13 @@ namespace RaidBot.Commands.RaidCommands
             _description = "";
             _color = DiscordColor.Green;
 
-            foreach (var raid in getRaids)
+            foreach (var raidName in getRaids.Select(raid => raid.RaidName))
             {
-                var raidName = raid.RaidName;
-
                 _description += $"{raidName}\n";
             }
             
-            ctx.EditResponseAsync(new DiscordWebhookBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
         }
     }
 }

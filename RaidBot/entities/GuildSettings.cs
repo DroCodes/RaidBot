@@ -5,6 +5,7 @@ namespace RaidBot.entities
         public ulong GuildId { get; set; }
         public ulong? RaidChannelId { get; set; }
         public ulong? RaidChannelGroup {get; set;}
-        public List<ActiveRaids>? ActiveRaids { get; set; }
+        public SignUpEmoji? Emoji { get; set; }
+        public ICollection<RaidSettings>? RaidList { get; set; }
     }
 }

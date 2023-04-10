@@ -20,8 +20,8 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
-                if (checkGuildExistsInDB != null) return false;
+                var checkGuildExistsInDb = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDb != null) return false;
             
             var guildSettings = new GuildSettings
             {
@@ -44,14 +44,19 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
-                if (checkGuildExistsInDB == null) return false;
+                var checkGuildExistsInDb = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDb == null) return false;
                 
                 var guildSettings = _context.GuildSettings.FirstOrDefault(x => x.GuildId == guildId);
+                if (guildSettings == null)
+                {
+                    return await _context.SaveChangesAsync() > 0;
+                }
+                
                 guildSettings.RaidChannelId = raidChannelId;
 
                 _context.GuildSettings.Update(guildSettings);
-               
+
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
@@ -66,13 +71,18 @@ namespace RaidBot.Data.Repository
             
             try
             {
-                var checkGuildExistsInDB = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
-                if (checkGuildExistsInDB == null) return false;
+                var checkGuildExistsInDb = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                if (checkGuildExistsInDb == null) return false;
 
                 var guildSettings = _context.GuildSettings.FirstOrDefault(x => x.GuildId == guildId);
+                if (guildSettings == null)
+                {
+                    return await _context.SaveChangesAsync() > 0;
+                }
                 guildSettings.RaidChannelGroup = channelGroupId;
 
                 _context.GuildSettings.Update(guildSettings);
+
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
@@ -82,18 +92,21 @@ namespace RaidBot.Data.Repository
             }
         }
 
-        public async Task<List<ulong?>> CheckGuildSettings(ulong guildId)
+        public async Task<List<ulong?>?> CheckGuildSettings(ulong guildId)
         {
             try
             {
                 var checkGuildExists = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
-                if (checkGuildExists == null) return null;
+                if (checkGuildExists == null)
+                {
+                    return null;
+                }
 
                 return new List<ulong?>()
                 {
                     checkGuildExists.GuildId,
-                    (ulong?)checkGuildExists.RaidChannelId,
-                    (ulong?)checkGuildExists.RaidChannelGroup
+                    checkGuildExists.RaidChannelId,
+                    checkGuildExists.RaidChannelGroup
                 };
             }
             catch (Exception e)
