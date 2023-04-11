@@ -6,12 +6,15 @@ namespace RaidBot.entities
         public string RaidName { get; set; }
         public ulong GuildId { get; set; }
         public string? TierRole { get; set; }
+        public RaidRoles? Roles { get; set; }
         public string? Info { get; set; }
         public DateTime? Date { get; set; }
-        public DateTime? Time { get; set; }
-        public int ActiveRaidId { get; set; }
+        public TimeSpan? Time { get; set; }
+        public ICollection<Roster>? Roster { get; set; }
+        public ICollection<OverFlowRoster>? OverFlow { get; set; }
+        public ICollection<BackUpRoster>? BackUp { get; set; }
 
-        public ActiveRaids ActiveRaids { get; set; }
+        public GuildSettings GuildSettings { get; set; }
     }
 
 }

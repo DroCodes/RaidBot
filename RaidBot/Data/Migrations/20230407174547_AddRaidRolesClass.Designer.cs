@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RaidBot.Data;
@@ -11,9 +12,11 @@ using RaidBot.Data;
 namespace RaidBot.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230407174547_AddRaidRolesClass")]
+    partial class AddRaidRolesClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,84 @@ namespace RaidBot.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("DSharpPlus.Entities.DiscordMember", b =>
+                {
+                    b.Property<decimal>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("AvatarHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BannerHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CommunicationDisabledUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Flags")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsBot")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeafened")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsMuted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsPending")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsSystem")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("MfaEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nickname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("OAuthFlags")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("PremiumSince")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PremiumType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("Verified")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DiscordMember");
+                });
 
             modelBuilder.Entity("DSharpPlus.Entities.DiscordRole", b =>
                 {
@@ -61,64 +142,22 @@ namespace RaidBot.Data.Migrations
                     b.ToTable("DiscordRole");
                 });
 
-            modelBuilder.Entity("DSharpPlus.Entities.DiscordUser", b =>
+            modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)");
-
-                    b.Property<string>("AvatarHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("BannerHash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("Flags")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsBot")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool?>("IsSystem")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Locale")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool?>("MfaEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("OAuthFlags")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("PremiumType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool?>("Verified")
-                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DiscordUser");
+                    b.HasIndex("GuildId");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("DiscordUser");
-
-                    b.UseTphMappingStrategy();
+                    b.ToTable("ActiveRaids");
                 });
 
             modelBuilder.Entity("RaidBot.entities.AssignedTierRoles", b =>
@@ -140,39 +179,6 @@ namespace RaidBot.Data.Migrations
                     b.HasIndex("TierRoleId");
 
                     b.ToTable("AssignedTierRoles");
-                });
-
-            modelBuilder.Entity("RaidBot.entities.BackUpRoster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BackUpSettingsId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("MemberId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int?>("RaidSettingsId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("RoleId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BackUpSettingsId");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("RaidSettingsId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("BackUp");
                 });
 
             modelBuilder.Entity("RaidBot.entities.GuildMember", b =>
@@ -218,39 +224,6 @@ namespace RaidBot.Data.Migrations
                     b.ToTable("GuildSettings");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.OverFlowRoster", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal?>("MemberId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int>("OverflowSettingsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("RaidSettingsId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("RoleId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId");
-
-                    b.HasIndex("OverflowSettingsId");
-
-                    b.HasIndex("RaidSettingsId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("OverFlowRoster");
-                });
-
             modelBuilder.Entity("RaidBot.entities.RaidRoles", b =>
                 {
                     b.Property<int>("Id")
@@ -287,6 +260,9 @@ namespace RaidBot.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("ActiveRaidId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -300,7 +276,7 @@ namespace RaidBot.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("RolesId")
+                    b.Property<int>("RolesId")
                         .HasColumnType("integer");
 
                     b.Property<string>("TierRole")
@@ -311,7 +287,7 @@ namespace RaidBot.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
+                    b.HasIndex("ActiveRaidId");
 
                     b.HasIndex("RolesId");
 
@@ -376,7 +352,7 @@ namespace RaidBot.Data.Migrations
                     b.ToTable("RaidStatsByTiers");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.Roster", b =>
+            modelBuilder.Entity("RaidBot.entities.Roles", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -384,34 +360,23 @@ namespace RaidBot.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("GroupMemberId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<string>("Dps")
+                        .HasColumnType("text");
 
-                    b.Property<decimal?>("MemberId")
-                        .HasColumnType("numeric(20,0)");
+                    b.Property<string>("Healer")
+                        .HasColumnType("text");
 
-                    b.Property<int?>("RaidSettingsId")
+                    b.Property<int>("RaidSettingsId")
                         .HasColumnType("integer");
 
-                    b.Property<decimal?>("RoleId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<int>("RosterSettingsId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Tank")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupMemberId");
-
-                    b.HasIndex("MemberId");
-
                     b.HasIndex("RaidSettingsId");
 
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("RosterSettingsId");
-
-                    b.ToTable("Rosters");
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("RaidBot.entities.SignUpEmoji", b =>
@@ -423,24 +388,18 @@ namespace RaidBot.Data.Migrations
                     b.Property<decimal?>("AssignedRole")
                         .HasColumnType("numeric(20,0)");
 
-                    b.Property<decimal?>("GuildSettingsGuildId")
-                        .HasColumnType("numeric(20,0)");
-
-                    b.Property<decimal>("GuildSettingsId")
-                        .HasColumnType("numeric(20,0)");
-
                     b.Property<string>("Name")
                         .HasColumnType("text");
+
+                    b.Property<int>("RaidSettingsId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Url")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildSettingsGuildId")
-                        .IsUnique();
-
-                    b.HasIndex("GuildSettingsId");
+                    b.HasIndex("RaidSettingsId");
 
                     b.ToTable("SignUpEmojis");
                 });
@@ -493,40 +452,22 @@ namespace RaidBot.Data.Migrations
                     b.ToTable("UserRaidHistories");
                 });
 
-            modelBuilder.Entity("DSharpPlus.Entities.DiscordMember", b =>
-                {
-                    b.HasBaseType("DSharpPlus.Entities.DiscordUser");
-
-                    b.Property<DateTimeOffset?>("CommunicationDisabledUntil")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeafened")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsMuted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool?>("IsPending")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset>("JoinedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Nickname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("PremiumSince")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasDiscriminator().HasValue("DiscordMember");
-                });
-
             modelBuilder.Entity("DSharpPlus.Entities.DiscordRole", b =>
                 {
                     b.HasOne("DSharpPlus.Entities.DiscordMember", null)
                         .WithMany("Roles")
                         .HasForeignKey("DiscordMemberId");
+                });
+
+            modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
+                {
+                    b.HasOne("RaidBot.entities.GuildSettings", "GuildSettings")
+                        .WithMany("ActiveRaids")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GuildSettings");
                 });
 
             modelBuilder.Entity("RaidBot.entities.AssignedTierRoles", b =>
@@ -538,33 +479,6 @@ namespace RaidBot.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("TierRole");
-                });
-
-            modelBuilder.Entity("RaidBot.entities.BackUpRoster", b =>
-                {
-                    b.HasOne("RaidBot.entities.RaidSettings", "RaidSettings")
-                        .WithMany()
-                        .HasForeignKey("BackUpSettingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DSharpPlus.Entities.DiscordMember", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId");
-
-                    b.HasOne("RaidBot.entities.RaidSettings", null)
-                        .WithMany("BackUp")
-                        .HasForeignKey("RaidSettingsId");
-
-                    b.HasOne("DSharpPlus.Entities.DiscordRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("RaidSettings");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("RaidBot.entities.GuildMember", b =>
@@ -584,33 +498,6 @@ namespace RaidBot.Data.Migrations
                     b.Navigation("GuildSettings");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.OverFlowRoster", b =>
-                {
-                    b.HasOne("DSharpPlus.Entities.DiscordMember", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId");
-
-                    b.HasOne("RaidBot.entities.RaidSettings", "RaidSettings")
-                        .WithMany()
-                        .HasForeignKey("OverflowSettingsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RaidBot.entities.RaidSettings", null)
-                        .WithMany("OverFlow")
-                        .HasForeignKey("RaidSettingsId");
-
-                    b.HasOne("DSharpPlus.Entities.DiscordRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId");
-
-                    b.Navigation("Member");
-
-                    b.Navigation("RaidSettings");
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("RaidBot.entities.RaidRoles", b =>
                 {
                     b.HasOne("RaidBot.entities.RaidSettings", "RaidSettings")
@@ -624,17 +511,19 @@ namespace RaidBot.Data.Migrations
 
             modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>
                 {
-                    b.HasOne("RaidBot.entities.GuildSettings", "GuildSettings")
-                        .WithMany("RaidList")
-                        .HasForeignKey("GuildId")
+                    b.HasOne("RaidBot.entities.ActiveRaids", "ActiveRaids")
+                        .WithMany("Raids")
+                        .HasForeignKey("ActiveRaidId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RaidBot.entities.RaidRoles", "Roles")
                         .WithMany()
-                        .HasForeignKey("RolesId");
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("GuildSettings");
+                    b.Navigation("ActiveRaids");
 
                     b.Navigation("Roles");
                 });
@@ -669,54 +558,26 @@ namespace RaidBot.Data.Migrations
                     b.Navigation("UserRaidHistory");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.Roster", b =>
+            modelBuilder.Entity("RaidBot.entities.Roles", b =>
                 {
-                    b.HasOne("DSharpPlus.Entities.DiscordUser", "GroupMember")
-                        .WithMany()
-                        .HasForeignKey("GroupMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DSharpPlus.Entities.DiscordMember", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberId");
-
-                    b.HasOne("RaidBot.entities.RaidSettings", null)
-                        .WithMany("Roster")
-                        .HasForeignKey("RaidSettingsId");
-
-                    b.HasOne("DSharpPlus.Entities.DiscordRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId");
-
                     b.HasOne("RaidBot.entities.RaidSettings", "RaidSettings")
                         .WithMany()
-                        .HasForeignKey("RosterSettingsId")
+                        .HasForeignKey("RaidSettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GroupMember");
-
-                    b.Navigation("Member");
-
                     b.Navigation("RaidSettings");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("RaidBot.entities.SignUpEmoji", b =>
                 {
-                    b.HasOne("RaidBot.entities.GuildSettings", null)
-                        .WithOne("Emoji")
-                        .HasForeignKey("RaidBot.entities.SignUpEmoji", "GuildSettingsGuildId");
-
-                    b.HasOne("RaidBot.entities.GuildSettings", "GuildSettings")
+                    b.HasOne("RaidBot.entities.RaidSettings", "RaidSettings")
                         .WithMany()
-                        .HasForeignKey("GuildSettingsId")
+                        .HasForeignKey("RaidSettingsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("GuildSettings");
+                    b.Navigation("RaidSettings");
                 });
 
             modelBuilder.Entity("RaidBot.entities.TierRole", b =>
@@ -741,20 +602,19 @@ namespace RaidBot.Data.Migrations
                     b.Navigation("GuildMember");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.GuildSettings", b =>
+            modelBuilder.Entity("DSharpPlus.Entities.DiscordMember", b =>
                 {
-                    b.Navigation("Emoji");
-
-                    b.Navigation("RaidList");
+                    b.Navigation("Roles");
                 });
 
-            modelBuilder.Entity("RaidBot.entities.RaidSettings", b =>
+            modelBuilder.Entity("RaidBot.entities.ActiveRaids", b =>
                 {
-                    b.Navigation("BackUp");
+                    b.Navigation("Raids");
+                });
 
-                    b.Navigation("OverFlow");
-
-                    b.Navigation("Roster");
+            modelBuilder.Entity("RaidBot.entities.GuildSettings", b =>
+                {
+                    b.Navigation("ActiveRaids");
                 });
 
             modelBuilder.Entity("RaidBot.entities.TierRole", b =>
@@ -767,11 +627,6 @@ namespace RaidBot.Data.Migrations
                     b.Navigation("RaidStatsByRole");
 
                     b.Navigation("RaidStatsByTier");
-                });
-
-            modelBuilder.Entity("DSharpPlus.Entities.DiscordMember", b =>
-                {
-                    b.Navigation("Roles");
                 });
 #pragma warning restore 612, 618
         }

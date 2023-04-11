@@ -25,6 +25,7 @@ namespace RaidBot.Commands.RaidCommands
         public async Task CreateRaid(InteractionContext ctx, [Option("raid-name", "The name of the raid")] string name)
         {
             var guildId = ctx.Guild.Id;
+            string raidName = name.Replace(" ", "-").ToLower();
             // send the user a private message
             var dm = await ctx.Member.CreateDmChannelAsync();
 
@@ -32,8 +33,10 @@ namespace RaidBot.Commands.RaidCommands
                 new DiscordInteractionResponseBuilder()
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
-            
-            if (!await _repo.SaveNewRaid(name, guildId))
+
+            var saveRaid = await _repo?.SaveNewRaid(raidName, guildId)!;
+
+            if (!saveRaid)
             {
                 _title = "Error";
                 _description = "There was a problem creating the raid.";
@@ -44,10 +47,11 @@ namespace RaidBot.Commands.RaidCommands
                 return;
             }
 
-            await dm.SendMessageAsync("Hello, world!");
+            await dm.SendMessageAsync("Please continue with raid creation. \n" +
+                                      "type /info /roles /tier /date /time");
 
             _title = "Success";
-            _description = "Raid creation started, continue in a private message with me";
+            _description = $"Raid creation started for {raidName}, continue in a private message with me";
             _color = DiscordColor.Green;
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
@@ -63,36 +67,61 @@ namespace RaidBot.Commands.RaidCommands
                 new DiscordInteractionResponseBuilder()
                     .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
                     ));
-
-            if (!await _repo?.DeleteRaid(name, guildId)!)
+            
+            var deleteRaid = await _repo?.DeleteRaid(name, guildId)!;
+            
+            if (!deleteRaid)
             {
                 _title = "Error";
-                _description = "Something went wrong deleting {name}";
+                _description = $"Something went wrong deleting {name}";
                 _color = DiscordColor.Red;
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                     .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                     ));
+                return;
             }
 
             _title = "Success";
-            _description = "Raid Successfully deleted";
+            _description = $"{name} Successfully deleted";
             _color = DiscordColor.Green;
             await ctx.EditResponseAsync(new DiscordWebhookBuilder()
                 .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
                 ));
         }
 
-        [SlashCommand("info", "set the info for the raid")]
-        public async Task InfoCommand(InteractionContext ctx,
-            [Option("raidname", "The name of the raid")]
-            string raidName, [Option("Info", "Info about the raid")] string info)
+        [SlashCommand("raidlist", "Gets the list of active raids")]
+        public async Task GetRaidListCommand(InteractionContext ctx)
         {
             var guildId = ctx.Guild.Id;
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)));
+                new DiscordInteractionResponseBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(InitialResponse)
+                    ));
+            var getRaids = _repo?.GetActiveRaids(guildId);
 
-            await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder("test")));
+            if (getRaids == null)
+            {
+                _title = "Error";
+                _description = "There was a problem getting the raid list";
+                _color = DiscordColor.Red;
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                    .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)
+                    ));
+                return;
+            }
+
+            _title = "Active Raids";
+            _description = "";
+            _color = DiscordColor.Green;
+
+            foreach (var raidName in getRaids.Select(raid => raid.RaidName))
+            {
+                _description += $"{raidName}\n";
+            }
+            
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder()
+                .AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
         }
     }
 }
