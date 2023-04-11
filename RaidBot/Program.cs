@@ -59,8 +59,7 @@ public class Program
         {
             Services = services
         });
-
-        slashCommands.RegisterCommands<TestCommands>();
+        
         slashCommands.RegisterCommands<GuildSettingsCommands>();
         slashCommands.RegisterCommands<RaidCreationCommands>();
         slashCommands.RegisterCommands<TierSettingsCommands>();

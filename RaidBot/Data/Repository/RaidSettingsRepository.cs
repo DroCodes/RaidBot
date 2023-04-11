@@ -254,6 +254,9 @@ namespace RaidBot.Data.Repository
                     return null;
                 }
 
+                var roles = await _context.RaidRoles.FirstOrDefaultAsync(x => x.RoleSettingsId == findRaid.Id);
+
+
                 DateTime? date = findRaid.Date;
                 TimeSpan? time = findRaid.Time;
 
@@ -264,12 +267,13 @@ namespace RaidBot.Data.Repository
                     var newDate = new DateTime(2000, 01, 01);
                     combinedDateTime = newDate;
                 }
-
+                
                 var raidStats = new RaidSettings()
                 {
                     RaidName = findRaid.RaidName,
                     Info = findRaid.Info,
                     TierRole = findRaid.TierRole,
+                    Roles = roles,
                     Date = combinedDateTime
                 };
 
