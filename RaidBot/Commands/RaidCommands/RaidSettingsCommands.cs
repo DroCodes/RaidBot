@@ -67,7 +67,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
             _description = "There was an issue setting the tier, make sure the tier exists";
             _color = DiscordColor.Red;
 
-            ctx.EditResponseAsync(
+            await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
             return;
         }
@@ -76,7 +76,8 @@ public class RaidSettingsCommands : ApplicationCommandModule
         _description = $"The tier for the raid was set to {tierRole}";
         _color = DiscordColor.Green;
 
-        ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
+        await ctx.EditResponseAsync(
+            new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
     }
 
     // command to save the raid date to the database
@@ -88,7 +89,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
         string date)
 
     {
-        ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AddEmbed(_msg.EmbedBuilder(InitialResponse)));
         var formatDate = new FormatDateTime();
         try
@@ -102,18 +103,19 @@ public class RaidSettingsCommands : ApplicationCommandModule
                 _description = "There was an issue setting the Date, make sure you formatted the date properly";
                 _color = DiscordColor.Red;
 
-                ctx.EditResponseAsync(
+                await ctx.EditResponseAsync(
                     new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
 
             string convert = formatDate.ConvertToEasternTime(parseDate);
+            long convertToUnix = formatDate.ParseUnixTime(convert);
 
             _title = "Success";
-            _description = $"The Date for {raidName} was set to {convert}";
+            _description = $"The Date for {raidName} was set to <t:{convertToUnix}>";
             _color = DiscordColor.Green;
 
-            ctx.EditResponseAsync(
+            await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
         }
         catch (Exception e)
@@ -128,7 +130,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
         [Option("RaidName", "The name of the raid")]
         string raidName)
     {
-        ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
         var status = await _repo.GetStatus(raidName);
@@ -138,7 +140,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
             _description = "There was an issue getting the status";
             _color = DiscordColor.Red;
 
-            ctx.EditResponseAsync(
+            await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
             return;
         }
@@ -146,40 +148,44 @@ public class RaidSettingsCommands : ApplicationCommandModule
         try
         {
             var format = new FormatDateTime();
-            string convertTime = format.ConvertToEasternTime((DateTime)status.Date);
+            string convertTime = format.ConvertToEasternTime(((DateTime)status.Date));
+            // Console.WriteLine(status.Roles.HealerRole);
+
 
             var embed = new DiscordEmbedBuilder()
             {
                 Title = status.RaidName,
             };
 
-            if (status.Info == null)
-            {
-                status.Info = "Empty";
-            }
+            status.Info ??= "Empty";
+            status.TierRole ??= "0";
 
-            if (status.TierRole == null)
+            if (convertTime != "Saturday, January 01, 2000 1:00 AM")
             {
-                status.TierRole = "0";
-            }
-
-            embed.AddField("Raid Date:", convertTime, inline: false);
-            embed.AddField("Raid Info:", status.Info, inline: false);
-            embed.AddField("Tier:", $"Tier: {status.TierRole}", inline: true);
-            if (status.Roles != null)
-            {
-                embed.AddField("Roles:", $"Tanks: /n{status.Roles.TankRole}" +
-                                         $"/nHealers: {status.Roles.HealerRole}" +
-                                         $"/nDps: {status.Roles.HealerRole}", inline: true);
+                long convertToUnix = format.ParseUnixTime(convertTime);
+                embed.AddField("Raid Date:", $"<t:{convertToUnix}>", inline: false);
             }
             else
             {
-                embed.AddField("Roles:", $"Tanks: Not set" +
-                                         $"\nHealers: Not set" +
-                                         $"\nDps: Not set", inline: false);
+                embed.AddField("Raid Date:", "Date not set", inline: false);
             }
 
-            ctx.EditResponseAsync(
+            embed.AddField("Raid Info:", status.Info, inline: false);
+            embed.AddField("Raid Tier:", $"Tier: {status.TierRole}", inline: false);
+            if (status.Roles != null)
+            {
+                embed.AddField("Raid Roles:", $"Tanks: {status.Roles.TankRole}" +
+                                              $"\nHealers: {status.Roles.HealerRole}" +
+                                              $"\nDps: {status.Roles.HealerRole}", inline: false);
+            }
+            else
+            {
+                embed.AddField("Raid Roles:", $"Tanks: Not set" +
+                                              $"\nHealers: Not set" +
+                                              $"\nDps: Not set", inline: false);
+            }
+
+            await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(embed.Build()));
         }
         catch (Exception e)
@@ -191,14 +197,16 @@ public class RaidSettingsCommands : ApplicationCommandModule
 
     [SlashCommand("roles", "Adds roles to raid")]
     public async Task AddRolesCommand(InteractionContext ctx,
-        [Option("RaidName", "The name of the raid")] string raidName,
-        [Option("Tank", "Enter the number of tanks")] double tank,
+        [Option("RaidName", "The name of the raid")]
+        string raidName,
+        [Option("Tank", "Enter the number of tanks")]
+        double tank,
         [Option("Healer", "Enter the number of healers")]
         double healer,
         [Option("Dps", "Enter the number of Dps")]
         double dps)
     {
-        ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
+        await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
             new DiscordInteractionResponseBuilder().AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
         double[] roles = new[] { tank, healer, dps };
@@ -212,7 +220,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
             _description = "There was an issue saving the roles";
             _color = DiscordColor.Red;
 
-            ctx.EditResponseAsync(
+            await ctx.EditResponseAsync(
                 new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
             return;
         }
@@ -221,7 +229,7 @@ public class RaidSettingsCommands : ApplicationCommandModule
         _description = $"{raidName} was set with {tank} tanks, {healer}, healers, {dps}, dps";
         _color = DiscordColor.Green;
 
-        ctx.EditResponseAsync(
+        await ctx.EditResponseAsync(
             new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
     }
 }

@@ -7,7 +7,7 @@ namespace RaidBot.entities
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public string? TierName { get; set; }
-        public List<AssignedTierRoles>? Roles { get; set; }
+        public ICollection<AssignedTierRoles>? Roles { get; set; }
 
         [ForeignKey("GuildId")]
         public GuildSettings GuildSettings { get; set; }

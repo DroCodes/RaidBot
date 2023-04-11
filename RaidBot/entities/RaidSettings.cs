@@ -10,9 +10,11 @@ namespace RaidBot.entities
         public string? Info { get; set; }
         public DateTime? Date { get; set; }
         public TimeSpan? Time { get; set; }
-        public int ActiveRaidId { get; set; }
+        public ICollection<Roster>? Roster { get; set; }
+        public ICollection<OverFlowRoster>? OverFlow { get; set; }
+        public ICollection<BackUpRoster>? BackUp { get; set; }
 
-        public ActiveRaids ActiveRaids { get; set; }
+        public GuildSettings GuildSettings { get; set; }
     }
 
 }

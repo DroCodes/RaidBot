@@ -1,6 +1,4 @@
-using System.Runtime.Intrinsics.X86;
 using Microsoft.EntityFrameworkCore;
-using NpgsqlTypes;
 using RaidBot.entities;
 using RaidBot.Util;
 
@@ -22,7 +20,7 @@ namespace RaidBot.Data.Repository
             try
             {
                 var existingRaid = await _context.RaidSettings
-                    .FirstOrDefaultAsync(x => x.RaidName == raidName);
+                    .FirstOrDefaultAsync(x => x.RaidName == raidName && x.GuildId == guildId);
 
                 if (existingRaid != null)
                 {
@@ -30,28 +28,19 @@ namespace RaidBot.Data.Repository
                     return false;
                 }
 
-                var guildSettings = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == guildId);
-
-                if (guildSettings == null)
-                {
-                    // Guild settings not found, return error
-                    return false;
-                }
-
-                var newRaid = new ActiveRaids()
+                var newRaid = new RaidSettings()
                 {
                     GuildId = guildId,
-                    Raids = new List<RaidSettings>()
-                    {
-                        new()
-                        {
-                            RaidName = raidName,
-                            GuildId = guildId,
-                        }
-                    }
+                    RaidName = raidName,
                 };
 
-                _context.ActiveRaids.Add(newRaid);
+                var activeRaid = new GuildSettings()
+                {
+                    RaidList = new List<RaidSettings>() { newRaid }
+                };
+
+                _context.RaidSettings.Add(newRaid);
+                _context.GuildSettings.Add(activeRaid);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
@@ -66,22 +55,14 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var raid = _context.RaidSettings.FirstOrDefault(x => x.RaidName == raidName);
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName && x.GuildId == guildId);
 
-                if (raid == null)
+                if (findRaid == null)
                 {
                     return false;
                 }
 
-                var activeRaid = _context.ActiveRaids.FirstOrDefault(x => x.Id == raid.ActiveRaidId);
-
-                if (activeRaid == null)
-                {
-                    return false;
-                }
-
-
-                _context.ActiveRaids.Remove(activeRaid);
+                _context.RaidSettings.Remove(findRaid);
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
@@ -91,14 +72,12 @@ namespace RaidBot.Data.Repository
             }
         }
 
-        public async Task<List<RaidSettings>>? GetActiveRaids(ulong guildId)
+        public List<RaidSettings>? GetActiveRaids(ulong guildId)
         {
             try
             {
                 var getRaidList = _context.RaidSettings.Where(x => x.GuildId == guildId).OrderBy(x => x.RaidName)
                     .ToList();
-
-                if (getRaidList == null) return null;
 
                 return getRaidList;
             }
@@ -113,27 +92,26 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var findRaidWithRaidName = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
 
-                if (findRaidWithRaidName == null)
+                if (findRaid == null)
                 {
                     return false;
                 }
 
-                var findActiveRaids =
-                    await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaidWithRaidName.ActiveRaidId);
-
-                if (findActiveRaids == null)
+                var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
+                
+                if (findGuild == null)
                 {
                     return false;
                 }
 
-                findRaidWithRaidName.Info = info;
+                findRaid.Info = info;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "error adding info");
+                _logger.LogError(e, "Error adding info");
                 return false;
             }
         }
@@ -156,9 +134,9 @@ namespace RaidBot.Data.Repository
                     return false;
                 }
 
-                var findActiveRaid = await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaid.ActiveRaidId);
-
-                if (findActiveRaid == null)
+                var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
+                
+                if (findGuild == null)
                 {
                     return false;
                 }
@@ -178,11 +156,18 @@ namespace RaidBot.Data.Repository
             try
             {
                 var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
-                if (findRaid == null) return false;
+                
+                if (findRaid == null)
+                {
+                    return false;
+                }
 
-                var findActiveRaid = await _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == findRaid.ActiveRaidId);
-
-                if (findActiveRaid == null) return false;
+                var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
+                
+                if (findGuild == null)
+                {
+                    return false;
+                }
 
                 findRaid.Date = date.Date;
                 findRaid.Time = date.TimeOfDay;
@@ -200,16 +185,16 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var raid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
 
-                if (raid == null)
+                if (findRaid == null)
                 {
                     return false;
                 }
 
-                var findRaid = _context.ActiveRaids.FirstOrDefaultAsync(x => x.Id == raid.ActiveRaidId);
-
-                if (findRaid == null)
+                var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
+                
+                if (findGuild == null)
                 {
                     return false;
                 }
@@ -218,15 +203,30 @@ namespace RaidBot.Data.Repository
                 int healer = roles[1];
                 int dps = roles[2];
 
-                RaidRoles newRoles = new RaidRoles()
-                {
-                    TankRole = tank,
-                    HealerRole = healer,
-                    DpsRole = dps,
-                    RoleSettingsId = raid.Id // set the foreign key property
-                };
+                var existingRoles = await _context.RaidRoles.FirstOrDefaultAsync(x => x.RoleSettingsId == findRaid.Id);
 
-                raid.Roles = newRoles;
+                RaidRoles? newRoles = null;
+
+                if (existingRoles != null)
+                {
+                    existingRoles.TankRole = tank;
+                    existingRoles.HealerRole = healer;
+                    existingRoles.DpsRole = dps;
+                }
+                else
+                {
+                    newRoles = new RaidRoles()
+                    {
+                        TankRole = tank,
+                        HealerRole = healer,
+                        DpsRole = dps,
+                        RoleSettingsId = findRaid.Id // set the foreign key property
+                    };
+
+                    _context.RaidRoles.Add(newRoles);
+                }
+
+                findRaid.Roles = existingRoles ?? newRoles;
                 return await _context.SaveChangesAsync() > 0;
             }
             catch (Exception e)
@@ -236,26 +236,29 @@ namespace RaidBot.Data.Repository
             }
         }
 
-        public async Task<RaidSettings> GetStatus(string raidName)
+        public async Task<RaidSettings?> GetStatus(string raidName)
         {
             try
             {
-                var getRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
+                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
 
-                if (getRaid == null)
+                if (findRaid == null)
                 {
                     return null;
                 }
 
-                var raidStatus = _context.ActiveRaids.FirstOrDefault(x => x.Id == getRaid.ActiveRaidId);
-
-                if (raidStatus == null)
+                var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
+                
+                if (findGuild == null)
                 {
                     return null;
                 }
 
-                DateTime? date = getRaid.Date;
-                TimeSpan? time = getRaid.Time;
+                var roles = await _context.RaidRoles.FirstOrDefaultAsync(x => x.RoleSettingsId == findRaid.Id);
+
+
+                DateTime? date = findRaid.Date;
+                TimeSpan? time = findRaid.Time;
 
                 var combinedDateTime = date + time;
 
@@ -264,12 +267,13 @@ namespace RaidBot.Data.Repository
                     var newDate = new DateTime(2000, 01, 01);
                     combinedDateTime = newDate;
                 }
-
-                RaidSettings raidStats = new RaidSettings()
+                
+                var raidStats = new RaidSettings()
                 {
-                    RaidName = getRaid.RaidName,
-                    Info = getRaid.Info,
-                    TierRole = getRaid.TierRole,
+                    RaidName = findRaid.RaidName,
+                    Info = findRaid.Info,
+                    TierRole = findRaid.TierRole,
+                    Roles = roles,
                     Date = combinedDateTime
                 };
 
