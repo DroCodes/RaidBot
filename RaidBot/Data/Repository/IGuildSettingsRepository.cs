@@ -1,4 +1,5 @@
 using DSharpPlus.Entities;
+using RaidBot.entities;
 
 namespace RaidBot.Data.Repository
 {
@@ -7,6 +8,6 @@ namespace RaidBot.Data.Repository
         Task<bool> AddGuildId(ulong guildId);
         Task<bool> SetRaidChannelId(ulong guildId, ulong raidChannelId);
         Task<bool> SetRaidChannelGroup(ulong guildId, ulong? channelGroupId);
-        Task<List<ulong?>?> CheckGuildSettings(ulong guildId);
+        Task<GuildSettings?> CheckGuildSettings(ulong guildId);
     }
 }

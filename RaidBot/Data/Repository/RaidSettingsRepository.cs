@@ -55,7 +55,9 @@ namespace RaidBot.Data.Repository
         {
             try
             {
-                var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName && x.GuildId == guildId);
+                var findRaid =
+                    await _context.RaidSettings.FirstOrDefaultAsync(x =>
+                        x.RaidName == raidName && x.GuildId == guildId);
 
                 if (findRaid == null)
                 {
@@ -100,7 +102,7 @@ namespace RaidBot.Data.Repository
                 }
 
                 var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
-                
+
                 if (findGuild == null)
                 {
                     return false;
@@ -135,7 +137,7 @@ namespace RaidBot.Data.Repository
                 }
 
                 var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
-                
+
                 if (findGuild == null)
                 {
                     return false;
@@ -156,14 +158,14 @@ namespace RaidBot.Data.Repository
             try
             {
                 var findRaid = await _context.RaidSettings.FirstOrDefaultAsync(x => x.RaidName == raidName);
-                
+
                 if (findRaid == null)
                 {
                     return false;
                 }
 
                 var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
-                
+
                 if (findGuild == null)
                 {
                     return false;
@@ -193,7 +195,7 @@ namespace RaidBot.Data.Repository
                 }
 
                 var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
-                
+
                 if (findGuild == null)
                 {
                     return false;
@@ -248,7 +250,7 @@ namespace RaidBot.Data.Repository
                 }
 
                 var findGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == findRaid.GuildId);
-                
+
                 if (findGuild == null)
                 {
                     return null;
@@ -267,10 +269,11 @@ namespace RaidBot.Data.Repository
                     var newDate = new DateTime(2000, 01, 01);
                     combinedDateTime = newDate;
                 }
-                
+
                 var raidStats = new RaidSettings()
                 {
                     RaidName = findRaid.RaidName,
+                    GuildId = findRaid.GuildId,
                     Info = findRaid.Info,
                     TierRole = findRaid.TierRole,
                     Roles = roles,
@@ -282,6 +285,27 @@ namespace RaidBot.Data.Repository
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                return null;
+            }
+        }
+
+        public async Task<List<AssignedTierRoles>> GetRoles(ulong guildId, string tierRole)
+        {
+            try
+            {
+                // var getGuild = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == guildId);
+                var getRierRoles = await _context.AssignedTierRoles.Where(x => x.TierRole.TierName == tierRole && x.TierRole.Id == x.TierRoleId).ToListAsync();
+
+                if (getRierRoles == null)
+                {
+                    return null;
+                }
+
+                return getRierRoles;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error getting roles");
                 return null;
             }
         }

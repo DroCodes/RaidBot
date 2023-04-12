@@ -125,4 +125,10 @@ public class FormatDateTime
         // Format the converted DateTime as a string and return it
         return convertedDateTime.ToString("dddd, MMMM dd, yyyy h:mm tt");
     }
+    
+    public long DateTimeToUnixTime(DateTime dt)
+    {
+        var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        return Convert.ToInt64((dt.ToUniversalTime() - epoch).TotalSeconds);
+    }
 }
