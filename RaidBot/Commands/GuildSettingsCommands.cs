@@ -168,15 +168,12 @@ namespace RaidBot.Commands
                 ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
                 return;
             }
-
-            var guildChannelName = guildChannels.FirstOrDefault(x => x.Key == checkGuild[1]);
-            var guildCategoryName = guildChannels.FirstOrDefault(x => x.Key == checkGuild[2]);
-
+            
             _title = "Success";
             _description =
-                $"Guild Id: {checkGuild[0]}\n" +
-                $"Raid Channel Id: {guildChannelName.Value}\n" +
-                $"Raid Channel Group: {guildCategoryName.Value}";
+                $"Guild Id: {checkGuild.GuildId}\n" +
+                $"Raid Channel Id: {checkGuild.RaidChannelId}\n" +
+                $"Raid Channel Group: {checkGuild.RaidChannelId}";
             _color = DiscordColor.Green;
 
             ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));

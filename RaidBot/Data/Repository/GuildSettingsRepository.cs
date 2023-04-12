@@ -92,22 +92,24 @@ namespace RaidBot.Data.Repository
             }
         }
 
-        public async Task<List<ulong?>?> CheckGuildSettings(ulong guildId)
+        public async Task<GuildSettings?> CheckGuildSettings(ulong guildId)
         {
             try
             {
-                var checkGuildExists = _context.GuildSettings.SingleOrDefault(x => x.GuildId == guildId);
+                var checkGuildExists = await _context.GuildSettings.FirstOrDefaultAsync(x => x.GuildId == guildId);
                 if (checkGuildExists == null)
                 {
                     return null;
                 }
-
-                return new List<ulong?>()
+                
+                var guildSettings = new GuildSettings()
                 {
-                    checkGuildExists.GuildId,
-                    checkGuildExists.RaidChannelId,
-                    checkGuildExists.RaidChannelGroup
+                    GuildId = checkGuildExists.GuildId,
+                    RaidChannelId = checkGuildExists.RaidChannelId,
+                    RaidChannelGroup = checkGuildExists.RaidChannelGroup
                 };
+
+                return guildSettings;
             }
             catch (Exception e)
             {

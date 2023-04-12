@@ -12,5 +12,6 @@ namespace RaidBot.Data.Repository
         Task<bool> SaveDateTime(string raidName, DateTime date);
         Task<RaidSettings?> GetStatus(string raidName);
         Task<bool> SetRolesForRaid(string raidName, int[] roles);
+        Task<List<AssignedTierRoles>> GetRoles(ulong guildId, string tierRole);
     }
 }
