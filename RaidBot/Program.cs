@@ -48,10 +48,12 @@ public class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IGuildSettingsRepository, GuildSettingsRepository>()
-            .AddSingleton<IRaidSettingsRepository, RaidSettingsRepository>()
             .AddSingleton<ITierSettingsRepository, TierSettingsRepository>()
             .AddSingleton<IMessageBuilder, MessageBuilder>()
             .AddSingleton<ILogger, Logger>()
+            .AddSingleton<IRaidRepository, RaidRepository>()
+            .AddSingleton<IRaidInfoRepository, RaidInfoRepository>()
+            .AddSingleton<IRaidRolesRepository, RaidRolesRepository>()
             .AddDbContext<DataContext>(options => options.UseNpgsql(connectionString))
             .BuildServiceProvider();
 
@@ -61,9 +63,11 @@ public class Program
         });
         
         slashCommands.RegisterCommands<GuildSettingsCommands>();
-        slashCommands.RegisterCommands<RaidCreationCommands>();
+        slashCommands.RegisterCommands<RaidManagementService>();
         slashCommands.RegisterCommands<TierSettingsCommands>();
-        slashCommands.RegisterCommands<RaidSettingsCommands>();
+        slashCommands.RegisterCommands<RaidListService>();
+        slashCommands.RegisterCommands<RaidRoleService>();
+        slashCommands.RegisterCommands<RaidStatusService>();
 
         // Connect to the gateway
         await client.ConnectAsync();
