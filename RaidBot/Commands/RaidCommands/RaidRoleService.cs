@@ -17,7 +17,8 @@ public class RaidRoleService : ApplicationCommandModule
     private string? _description;
     private DiscordColor _color;
 
-    public RaidRoleService(IRaidRolesRepository repository, IRaidRepository raidRepo, IGuildSettingsRepository guildRepo,
+    public RaidRoleService(IRaidRolesRepository repository, IRaidRepository raidRepo,
+        IGuildSettingsRepository guildRepo,
         IMessageBuilder message)
     {
         _repo = repository;
@@ -25,8 +26,8 @@ public class RaidRoleService : ApplicationCommandModule
         _raidRepo = raidRepo;
         _guildRepo = guildRepo;
     }
-    
-     [SlashCommand("roles", "Adds roles to raid")]
+
+    [SlashCommand("roles", "Adds roles to raid")]
     public async Task AddRolesCommand(InteractionContext ctx,
         [Option("RaidName", "The name of the raid")]
         string raidName,
@@ -79,6 +80,7 @@ public class RaidRoleService : ApplicationCommandModule
             if (getRaid == null)
             {
                 _title = "Error";
+                _description = "Error getting raid";
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
@@ -87,22 +89,24 @@ public class RaidRoleService : ApplicationCommandModule
             }
 
             var guild = await _guildRepo.CheckGuildSettings(getRaid.GuildId); // gets the guild settings
-            
+
             if (guild == null)
             {
                 _title = "Error";
+                _description = "Error getting the guild Id";
                 _color = DiscordColor.Red;
-            
+
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, null, _color)));
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
 
             var findGuild = await client.GetGuildAsync(getRaid.GuildId); // finds the correct guild to open the raid in
-            
+
             if (findGuild == null)
             {
                 _title = "Error";
+                _description = "Error getting the guild";
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
@@ -113,14 +117,17 @@ public class RaidRoleService : ApplicationCommandModule
             if (guild.RaidChannelGroup == null)
             {
                 _title = "Error";
+                _description = "Channel Group does not exist";
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, null, _color)));
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
 
-            var findChannelGroup = await client.GetChannelAsync((ulong)guild.RaidChannelGroup); // gets the channel group the channel will be created in
+            var findChannelGroup =
+                await client.GetChannelAsync((ulong)guild
+                    .RaidChannelGroup); // gets the channel group the channel will be created in
 
             if (getRaid.TierRole == null)
             {
@@ -132,7 +139,9 @@ public class RaidRoleService : ApplicationCommandModule
                     new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
-            var getRoles = await _repo.GetRoles(getRaid.GuildId, getRaid.TierRole); // gets the roles associated with the tier
+
+            var getRoles =
+                await _repo.GetRoles(getRaid.GuildId, getRaid.TierRole); // gets the roles associated with the tier
 
             var channelManager = new ChannelManager(); // new instance of ChannelManager class
             // Method to create a new channel
@@ -150,7 +159,7 @@ public class RaidRoleService : ApplicationCommandModule
                     new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
-            
+
             // gets the newly created channel
             var channel = await client.GetChannelAsync(newChannel.Id);
             var roles = findGuild.Roles;
@@ -169,9 +178,9 @@ public class RaidRoleService : ApplicationCommandModule
                     }
                 }
             }
-            
+
             var msg = await channel.SendMessageAsync(message); // msg with role mentions
-            
+
             // builds embed
             var embed = new DiscordEmbedBuilder()
             {
