@@ -8,43 +8,51 @@ public class FormatDateTime
 {
     public DateTime ParseDateTime(string date)
     {
-        string[] formats = { "MM/dd/ HH:mm", "MM/dd/ HHmm", "MM-dd HH:mm", "MM-dd HHmm" };
-    
-        // Attempt to parse the input string as a date with a time
-        if (DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None,
-                out DateTime parsedDateTime))
+        try
         {
-            // Specify that the parsed date/time is in Eastern time
-            var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+            string[] formats = { "MM/dd/ HH:mm", "MM/dd/ HHmm", "MM-dd HH:mm", "MM-dd HHmm" };
     
-            // Convert the parsed date/time to UTC
-            var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(parsedDateTime, easternTimeZone);
+            // Attempt to parse the input string as a date with a time
+            if (DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out DateTime parsedDateTime))
+            {
+                // Specify that the parsed date/time is in Eastern time
+                var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
     
-            // Return the converted date/time with a UTC DateTimeKind
-            return utcDateTime;
+                // Convert the parsed date/time to UTC
+                var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(parsedDateTime, easternTimeZone);
+    
+                // Return the converted date/time with a UTC DateTimeKind
+                return utcDateTime;
+            }
+    
+            // Attempt to parse the input string as a date without a time
+            if (DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None,
+                    out DateTime parsedDate))
+            {
+                // Combine the parsed date with the current time to create a DateTime object with a time component
+                DateTime currentDate = DateTime.Now;
+                parsedDateTime = new DateTime(currentDate.Year, parsedDate.Month, parsedDate.Day, currentDate.Hour,
+                    currentDate.Minute, currentDate.Second);
+    
+                // Specify that the parsed date/time is in Eastern time
+                var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+    
+                // Convert the parsed date/time to UTC
+                var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(parsedDateTime, easternTimeZone);
+    
+                // Return the converted date/time with a UTC DateTimeKind
+                return utcDateTime;
+            }
+    
+            // If the input string could not be parsed as a date, throw an exception
+            throw new ArgumentException("Invalid date format", nameof(date));
         }
-    
-        // Attempt to parse the input string as a date without a time
-        if (DateTime.TryParseExact(date, formats, CultureInfo.InvariantCulture, DateTimeStyles.None,
-                out DateTime parsedDate))
+        catch (Exception e)
         {
-            // Combine the parsed date with the current time to create a DateTime object with a time component
-            DateTime currentDate = DateTime.Now;
-            parsedDateTime = new DateTime(currentDate.Year, parsedDate.Month, parsedDate.Day, currentDate.Hour,
-                currentDate.Minute, currentDate.Second);
-    
-            // Specify that the parsed date/time is in Eastern time
-            var easternTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-    
-            // Convert the parsed date/time to UTC
-            var utcDateTime = TimeZoneInfo.ConvertTimeToUtc(parsedDateTime, easternTimeZone);
-    
-            // Return the converted date/time with a UTC DateTimeKind
-            return utcDateTime;
+            Console.WriteLine(e);
+            return new DateTime(2000, 01, 1);
         }
-    
-        // If the input string could not be parsed as a date, throw an exception
-        throw new ArgumentException("Invalid date format", nameof(date));
     }
     
     public long ParseUnixTime(string date)
