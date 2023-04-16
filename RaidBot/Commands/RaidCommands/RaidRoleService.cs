@@ -198,6 +198,12 @@ public class RaidRoleService : ApplicationCommandModule
             // adds reaction to raid channel
             var emoji = DiscordEmoji.FromGuildEmote(client, 987010296642142238);
             await msgEmbed.CreateReactionAsync(emoji);
+            
+            var createThread =
+                await channelManager.CreateRaidChannelThread(channel, raidName + "-discussion",
+                    ChannelType.PublicThread);
+
+            var sendMessageInThread = createThread.SendMessageAsync("This is the thread to discuss the raid");
 
             _title = "Success";
             _description = "Raid has been opened and channel has been created";

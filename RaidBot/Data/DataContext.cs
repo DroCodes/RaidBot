@@ -116,7 +116,7 @@ namespace RaidBot.Data
                 .HasForeignKey(r => r.RaidHistoryId)
                 .OnDelete(DeleteBehavior.Cascade);
             // end of GuildMember relations
-            
+
             // Ignores DSharpPlus DiscordRoleTags Entity
             modelBuilder.Ignore<DiscordRoleTags>();
 
