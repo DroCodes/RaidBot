@@ -1,4 +1,3 @@
-using DSharpPlus.Entities;
 using Microsoft.EntityFrameworkCore;
 using RaidBot.entities;
 using RaidBot.Util;
@@ -36,8 +35,6 @@ namespace RaidBot.Data.Repository
                 _logger.LogError(e, "Error Saving GuildId in AddGuildId method");
                 return false;
             }
-           
-            return true;
         }
 
         public async Task<bool> SetRaidChannelId(ulong guildId, ulong raidChannelId)

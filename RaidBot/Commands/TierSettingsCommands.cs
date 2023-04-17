@@ -11,7 +11,7 @@ namespace RaidBot.Commands
     {
         private readonly ITierSettingsRepository _repo;
         private readonly IMessageBuilder _messageBuilder;
-        private readonly string _initialResponse = "Thinking";
+        private readonly string? _initialResponse = "Thinking";
         private string? _title;
         private string? _description;
         private DiscordColor? _color;

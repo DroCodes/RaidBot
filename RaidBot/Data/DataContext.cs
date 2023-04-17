@@ -71,11 +71,10 @@ namespace RaidBot.Data
                 .WithMany()
                 .HasForeignKey(r => r.BackUpSettingsId)
                 .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<SignUpEmoji>()
                 .HasOne<GuildSettings>(s => s.GuildSettings)
-                .WithMany()
-                .HasForeignKey(s => s.GuildSettingsId)
+                .WithMany(s => s.Emoji)
+                .HasForeignKey(s => s.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
             // end of ActivityRaids relationship
             // Beginning of Tier Role relationships
@@ -91,7 +90,7 @@ namespace RaidBot.Data
                 .HasForeignKey(r => r.TierRoleId)
                 .OnDelete(DeleteBehavior.Cascade);
             // end of TierRole relationship
-            // beggniing of guild member relations
+            // beginning of guild member relations
             modelBuilder.Entity<GuildMember>()
                 .HasOne(g => g.GuildSettings)
                 .WithMany()
