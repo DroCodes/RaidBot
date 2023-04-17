@@ -5,7 +5,7 @@ namespace RaidBot.Util;
 
 public class MessageBuilder : ApplicationCommandModule, IMessageBuilder
 {
-    public DiscordEmbedBuilder EmbedBuilder(string title = null, string description = null, DiscordColor? color = null)
+    public DiscordEmbedBuilder EmbedBuilder(string? title = null, string? description = null, DiscordColor? color = null)
     {
         var embed = new DiscordEmbedBuilder();
         if (title != null)

@@ -12,7 +12,7 @@ public class RaidStatusService : ApplicationCommandModule
     private readonly IRaidInfoRepository _repo;
     private readonly IRaidRepository _raidRepo;
     private readonly IMessageBuilder _msg;
-    private const string InitialResponse = "Thinking";
+    private const string? InitialResponse = "Thinking";
     private string? _title;
     private string? _description;
     private DiscordColor _color;

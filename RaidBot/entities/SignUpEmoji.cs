@@ -4,13 +4,13 @@ namespace RaidBot.entities
 {
     public class SignUpEmoji
     {
-        public ulong Id { get; set; }
-        public ulong GuildSettingsId { get; set; }
-        public ulong? AssignedRole { get; set; } 
-        public string? Name { get; set; }   
-        public string? Url { get; set; }
-        
-        public GuildSettings? GuildSettings { get; set; }
+        public int Id { get; set; }
+        public ulong GuildId { get; set; }
+        public string? RaidRole { get; set; } 
+        public string? EmojiName { get; set; }
+
+        [ForeignKey("GuildId")]
+        public GuildSettings GuildSettings { get; set; }
     }
 }
 

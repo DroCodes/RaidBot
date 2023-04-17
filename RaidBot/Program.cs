@@ -54,6 +54,7 @@ public class Program
             .AddSingleton<IRaidRepository, RaidRepository>()
             .AddSingleton<IRaidInfoRepository, RaidInfoRepository>()
             .AddSingleton<IRaidRolesRepository, RaidRolesRepository>()
+            .AddSingleton<ISignUpReactionsRepository, SignUpReactionsRepository>()
             .AddDbContext<DataContext>(options => options.UseNpgsql(connectionString))
             .BuildServiceProvider();
 
@@ -68,6 +69,7 @@ public class Program
         slashCommands.RegisterCommands<RaidListService>();
         slashCommands.RegisterCommands<RaidRoleService>();
         slashCommands.RegisterCommands<RaidStatusService>();
+        slashCommands.RegisterCommands<GuildSignUpService>();
 
         // Connect to the gateway
         await client.ConnectAsync();
