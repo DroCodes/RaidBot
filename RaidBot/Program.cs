@@ -9,6 +9,7 @@ using RaidBot.Commands;
 using RaidBot.Commands.RaidCommands;
 using RaidBot.Data;
 using RaidBot.Data.Repository;
+using RaidBot.Events;
 using RaidBot.Util;
 using Serilog;
 using ILogger = RaidBot.Util.ILogger;
@@ -26,6 +27,16 @@ public class Program
         var connectionString = builder.GetConnectionString("DefaultConnection");
         var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
         optionsBuilder.UseNpgsql(connectionString);
+
+        var options = optionsBuilder.Options;
+        var context = new DataContext(options);
+        var logger = new Logger();
+
+        var guildSettings = new GuildSettingsRepository(context, logger);
+        var raidSettings = new RaidRepository(context, logger);
+        var tiers = new TierSettingsRepository(context, logger);
+        
+        var reactionSignup = new ReactionSignUpEvent(guildSettings, raidSettings, tiers);
         
         Log.Logger = new LoggerConfiguration()
                .WriteTo.Console()
@@ -45,6 +56,8 @@ public class Program
             Intents = DiscordIntents.All,
             LoggerFactory = logFactory
         });
+
+        client.MessageReactionAdded += reactionSignup.SignUp;
 
         var services = new ServiceCollection()
             .AddSingleton<IGuildSettingsRepository, GuildSettingsRepository>()

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RaidBot.entities;
 using RaidBot.Util;
 
@@ -68,7 +69,6 @@ namespace RaidBot.Data.Repository
                 _logger.LogError(e, "Error adding role to tier");
                 return false;
             }
-            
         }
 
         public async Task<bool> RemoveRoleFromTier(string tier, ulong guildId, string roleName)
@@ -105,7 +105,6 @@ namespace RaidBot.Data.Repository
                 _logger.LogError(e, $"There was an error removing {roleName} from {tier}");
                 return false;
             }
-           
         }
 
         public List<TierRole>? GetAllTiers(ulong guildId)
@@ -121,8 +120,8 @@ namespace RaidBot.Data.Repository
                 _logger.LogError(e, "There was an error retrieving the tiers");
                 return null;
             }
-           
         }
+
 
         public List<string>? GetRolesFromTier(int id, ulong guildId)
         {
@@ -148,7 +147,6 @@ namespace RaidBot.Data.Repository
                 _logger.LogError(e, $"There was an error getting the roles from tier");
                 return null;
             }
-            
         }
 
         public async Task<bool> DeleteTier(string tier, ulong guildId)
@@ -172,9 +170,37 @@ namespace RaidBot.Data.Repository
             catch (Exception e)
             {
                 _logger.LogError(e, $"Error deleting {tier}");
-                throw;
+                return false;
             }
-           
+        }
+
+        public async Task<List<AssignedTierRoles>> GetRoles(ulong guildId, string tierName)
+        {
+            try
+            {
+                var getTier = await _context.TierRoles.FirstOrDefaultAsync(x => x.TierName == tierName);
+                if (getTier == null)
+                {
+                    return null;
+                }
+
+                var getRoles = _context.AssignedTierRoles.Where(x => x.TierRoleId == getTier.Id).ToList();
+
+                // var roles = new List<AssignedTierRoles>();
+                //
+                // foreach (var role in getRoles)
+                // {
+                //     roles.Add(role);
+                //     Console.WriteLine(role);
+                // }
+
+                return getRoles;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, $"Error getting the roles in GetRoles");
+                return null;
+            }
         }
     }
 }
