@@ -2,6 +2,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using RaidBot.Data.Repository;
+using RaidBot.entities;
+using RaidBot.Util;
 
 namespace RaidBot.Events;
 
@@ -10,12 +12,14 @@ public class ReactionSignUpEvent
     private readonly IGuildSettingsRepository _guildRepo;
     private readonly IRaidRepository _raidRepo;
     private readonly ITierSettingsRepository _tierRepo;
+    private readonly IRosterRepository _roster;
 
-    public ReactionSignUpEvent(IGuildSettingsRepository guildRepo, IRaidRepository raidRepo, ITierSettingsRepository tier)
+    public ReactionSignUpEvent(IGuildSettingsRepository guildRepo, IRaidRepository raidRepo, ITierSettingsRepository tier, IRosterRepository roster)
     {
         _guildRepo = guildRepo;
         _raidRepo = raidRepo;
         _tierRepo = tier;
+        _roster = roster;
     }
     
     public async Task SignUp(DiscordClient s, MessageReactionAddEventArgs e)
@@ -72,8 +76,10 @@ public class ReactionSignUpEvent
 
             if (isUserQualified)
             {
+                var rosterManagement = new RaidRosterManagement(_roster);
                 await s.SendMessageAsync(e.Channel,"Test");
                 Console.WriteLine("Testing");
+                rosterManagement?.AddMemberToRoster(e.Guild.CurrentMember);
             }
             else
             {

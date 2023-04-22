@@ -57,24 +57,24 @@ namespace RaidBot.Data
 
             modelBuilder.Entity<Roster>()
                 .HasOne<RaidSettings>(r => r.RaidSettings)
-                .WithMany()
-                .HasForeignKey(r => r.RosterSettingsId)
+                .WithOne()
+                .HasForeignKey<Roster>(r => r.RosterSettingsId)
                 .OnDelete(DeleteBehavior.Cascade); 
             
             modelBuilder.Entity<MainRoster>()
-                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .HasOne<Roster>(r => r.Roster)
                 .WithMany()
                 .HasForeignKey(r => r.MainRosterId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<OverFlowRoster>()
-                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .HasOne<Roster>(r => r.Roster)
                 .WithMany()
                 .HasForeignKey(r => r.OverFlowRosterId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<BackUpRoster>()
-                .HasOne<RaidSettings>(r => r.RaidSettings)
+                .HasOne<Roster>(r => r.Roster)
                 .WithMany()
                 .HasForeignKey(r => r.BackUpRosterId)
                 .OnDelete(DeleteBehavior.Cascade);

@@ -27,16 +27,16 @@ public class Program
         var connectionString = builder.GetConnectionString("DefaultConnection");
         var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
         optionsBuilder.UseNpgsql(connectionString);
-
-        var options = optionsBuilder.Options;
-        var context = new DataContext(options);
+        
+        var context = new DataContext(optionsBuilder.Options);
         var logger = new Logger();
 
         var guildSettings = new GuildSettingsRepository(context, logger);
         var raidSettings = new RaidRepository(context, logger);
         var tiers = new TierSettingsRepository(context, logger);
+        var roster = new RosterRepository(context, logger);
         
-        var reactionSignup = new ReactionSignUpEvent(guildSettings, raidSettings, tiers);
+        var reactionSignup = new ReactionSignUpEvent(guildSettings, raidSettings, tiers, roster);
         
         Log.Logger = new LoggerConfiguration()
                .WriteTo.Console()
@@ -67,6 +67,7 @@ public class Program
             .AddSingleton<IRaidRepository, RaidRepository>()
             .AddSingleton<IRaidInfoRepository, RaidInfoRepository>()
             .AddSingleton<IRaidRolesRepository, RaidRolesRepository>()
+            .AddSingleton<IRosterRepository, RosterRepository>()
             .AddDbContext<DataContext>(options => options.UseNpgsql(connectionString))
             .BuildServiceProvider();
 
