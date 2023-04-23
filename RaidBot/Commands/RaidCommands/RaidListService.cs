@@ -10,7 +10,7 @@ public class RaidListService : ApplicationCommandModule
 {
     private readonly IRaidRepository _repo;
     private readonly IMessageBuilder _msg;
-    private const string InitialResponse = "Thinking";
+    private const string? InitialResponse = "Thinking";
     private string? _title;
     private string? _description;
     private DiscordColor _color;

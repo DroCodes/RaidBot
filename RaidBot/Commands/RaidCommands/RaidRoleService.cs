@@ -11,20 +11,22 @@ public class RaidRoleService : ApplicationCommandModule
     private readonly IRaidRolesRepository _repo;
     private readonly IRaidRepository _raidRepo;
     private readonly IGuildSettingsRepository _guildRepo;
+    private readonly ISignUpReactionsRepository _signUpRepo;
     private readonly IMessageBuilder _msg;
-    private const string InitialResponse = "Thinking";
+    private const string? InitialResponse = "Thinking";
     private string? _title;
     private string? _description;
     private DiscordColor _color;
 
     public RaidRoleService(IRaidRolesRepository repository, IRaidRepository raidRepo,
         IGuildSettingsRepository guildRepo,
-        IMessageBuilder message)
+        IMessageBuilder message, ISignUpReactionsRepository signUpRepo)
     {
         _repo = repository;
         _msg = message;
         _raidRepo = raidRepo;
         _guildRepo = guildRepo;
+        _signUpRepo = signUpRepo;
     }
 
     [SlashCommand("roles", "Adds roles to raid")]
@@ -204,9 +206,15 @@ public class RaidRoleService : ApplicationCommandModule
             // Sends embed to the raid channel
             var msgEmbed = await channel.SendMessageAsync(embed);
             // adds reaction to raid channel
-            var emoji = DiscordEmoji.FromGuildEmote(client, 987010296642142238);
-            await msgEmbed.CreateReactionAsync(emoji);
-            
+            var getEmoji = await _signUpRepo.GetSignUpReactions(guild.GuildId);
+
+            foreach (var emoji in getEmoji)
+            {
+                var e = DiscordEmoji.FromName(client, ":" + emoji.EmojiName + ":");
+                await msgEmbed.CreateReactionAsync(e);
+                Console.WriteLine(e);
+            }
+
             var createThread =
                 await channelManager.CreateRaidChannelThread(channel, raidName + "-discussion",
                     ChannelType.PublicThread);
@@ -223,7 +231,12 @@ public class RaidRoleService : ApplicationCommandModule
         catch (Exception e)
         {
             Console.WriteLine(e);
-            throw;
+            _title = "Error";
+            _description = "Something went wrong with the command";
+            _color = DiscordColor.Red;
+
+            await ctx.EditResponseAsync(
+                new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
         }
     }
 }

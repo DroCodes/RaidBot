@@ -9,16 +9,16 @@ namespace RaidBot.Commands
     public class GuildSettingsCommands : ApplicationCommandModule
     {
         private readonly IGuildSettingsRepository? _guildSettings;
-        private readonly IMessageBuilder _messageBuilder;
-        private const string _initialResponse = "Thinking";
-        private string _title;
-        private string _description;
+        private readonly IMessageBuilder _msg;
+        private const string? InitialResponse = "Thinking";
+        private string? _title;
+        private string? _description;
         private DiscordColor _color;
 
-        public GuildSettingsCommands(IGuildSettingsRepository guildSettingsRepository, IMessageBuilder MessageBuilder)
+        public GuildSettingsCommands(IGuildSettingsRepository guildSettingsRepository, IMessageBuilder msg)
         {
             _guildSettings = guildSettingsRepository;
-            _messageBuilder = MessageBuilder;
+            _msg = msg;
         }
 
         [SlashCommand("setguildid", "Set the guild id")]
@@ -28,7 +28,7 @@ namespace RaidBot.Commands
             
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
+                    .AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
             if (!await _guildSettings.AddGuildId(guildId))
             {
@@ -37,7 +37,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description,
                         _color)));
             }
             else
@@ -47,7 +47,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(_title, _description, _color)
+                    _msg.EmbedBuilder(_title, _description, _color)
                 ));
             }
         } // End SetGuildIdCommand
@@ -61,7 +61,7 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
+                    .AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
             if (channel.Type == ChannelType.Category)
             {
@@ -70,7 +70,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description,
                         _color)));
                 return;
             }
@@ -83,7 +83,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(_title, _description, _color)
+                    _msg.EmbedBuilder(_title, _description, _color)
                 ));
             }
             else
@@ -93,7 +93,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(_title, _description, _color)
+                    _msg.EmbedBuilder(_title, _description, _color)
                 ));
             }
         } // End SetRaidChannelCommand
@@ -108,7 +108,7 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
+                    .AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
             if (category.Type != ChannelType.Category)
             {
@@ -117,7 +117,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description,
                         _color)));
                 return;
             }
@@ -130,7 +130,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Red;
 
                 await ctx.EditResponseAsync(
-                    new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description,
+                    new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description,
                         _color)));
             }
             else
@@ -140,7 +140,7 @@ namespace RaidBot.Commands
                 _color = DiscordColor.Green;
 
                 await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(
-                    _messageBuilder.EmbedBuilder(_title, _description, _color)));
+                    _msg.EmbedBuilder(_title, _description, _color)));
             }
         } // end SetChannelGroupCommands
 
@@ -152,7 +152,7 @@ namespace RaidBot.Commands
 
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder()
-                    .AddEmbed(_messageBuilder.EmbedBuilder(_initialResponse)));
+                    .AddEmbed(_msg.EmbedBuilder(InitialResponse)));
 
             var checkGuild = await _guildSettings.CheckGuildSettings(guildId);
 
@@ -163,9 +163,7 @@ namespace RaidBot.Commands
                     $"This guild doesn't exist in my DB, please manually set the guild Id by using the command /setguildid, thank you";
                 _color = DiscordColor.Red;
 
-                var errorTitle = "Error";
-
-                ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
+                await ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
                 return;
             }
             
@@ -176,7 +174,7 @@ namespace RaidBot.Commands
                 $"Raid Channel Group: {checkGuild.RaidChannelId}";
             _color = DiscordColor.Green;
 
-            ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_messageBuilder.EmbedBuilder(_title, _description, _color)));
+            ctx.EditResponseAsync(new DiscordWebhookBuilder().AddEmbed(_msg.EmbedBuilder(_title, _description, _color)));
         } // end CheckGuildSettingsCommand
     }
 }
