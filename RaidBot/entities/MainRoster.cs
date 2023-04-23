@@ -1,17 +1,18 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using DSharpPlus.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace RaidBot.entities;
 
-public class OverFlowRoster
+public class MainRoster
 {
     public int Id { get; set; }
     public string MemberName { get; set; }
     public ulong MemberId { get; set; }
-    public int OverFlowRosterId { get; set; }
     public string Role { get; set; }
 
+    
+    public int MainRosterId { get; set; }
 
-    [ForeignKey("OverFlowRosterId")]
+    [ForeignKey("MainRosterId")]
     public Roster Roster { get; set; }
 }

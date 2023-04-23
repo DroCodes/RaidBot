@@ -192,7 +192,15 @@ public class RaidRoleService : ApplicationCommandModule
             var formatTime = new FormatDateTime();
             var convertTime = formatTime.DateTimeToUnixTime((DateTime)getRaid.Date);
 
-            embed.AddField("Info", getRaid.Info, false);
+            if (getRaid.Info != null)
+            {
+                embed.AddField("Info", getRaid.Info, false);
+            }
+            else
+            {
+                embed.AddField("Info", "...", false);
+
+            }
             embed.AddField("Date", $"<t:{convertTime}>");
 
             // Sends embed to the raid channel

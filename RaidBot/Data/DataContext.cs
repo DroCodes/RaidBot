@@ -24,6 +24,7 @@ namespace RaidBot.Data
         public DbSet<Roster> Rosters { get; set; }
         public OverFlowRoster OverFlow { get; set; }
         public DbSet<BackUpRoster> BackUp { get; set; }
+        public DbSet<MainRoster> MainRosters { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,20 +57,26 @@ namespace RaidBot.Data
 
             modelBuilder.Entity<Roster>()
                 .HasOne<RaidSettings>(r => r.RaidSettings)
-                .WithMany()
-                .HasForeignKey(r => r.RosterSettingsId)
+                .WithOne()
+                .HasForeignKey<Roster>(r => r.RosterSettingsId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MainRoster>()
+                .HasOne<Roster>(r => r.Roster)
+                .WithMany(r => r.MainRoster)
+                .HasForeignKey(r => r.MainRosterId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<OverFlowRoster>()
-                .HasOne<RaidSettings>(r => r.RaidSettings)
-                .WithMany()
-                .HasForeignKey(r => r.OverflowSettingsId)
+                .HasOne<Roster>(r => r.Roster)
+                .WithMany(r => r.OverFlowRoster)
+                .HasForeignKey(r => r.OverFlowRosterId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             modelBuilder.Entity<BackUpRoster>()
-                .HasOne<RaidSettings>(r => r.RaidSettings)
-                .WithMany()
-                .HasForeignKey(r => r.BackUpSettingsId)
+                .HasOne<Roster>(r => r.Roster)
+                .WithMany(r => r.BackUpRoster)
+                .HasForeignKey(r => r.BackUpRosterId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<SignUpEmoji>()
                 .HasOne<GuildSettings>(s => s.GuildSettings)

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using DSharpPlus.Entities;
 
 namespace RaidBot.entities;
@@ -5,8 +6,11 @@ namespace RaidBot.entities;
 public class BackUpRoster
 {
     public int Id { get; set; }
-    public int BackUpSettingsId{ get; set; }
-    public DiscordMember? Member { get; set; }
-    public DiscordRole? Role { get; set; }
-    public RaidSettings? RaidSettings { get; set; }
+    public string MemberName { get; set; }
+    public ulong MemberId { get; set; }
+    public string Role { get; set; }
+    public int BackUpRosterId { get; set; }
+
+    [ForeignKey("BackUpRosterId")]
+    public Roster Roster { get; set; }
 }
