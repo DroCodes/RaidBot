@@ -79,7 +79,7 @@ public class ReactionSignUpEvent
                 var rosterManagement = new RaidRosterManagement(_roster);
                 await s.SendMessageAsync(e.Channel,"Test");
                 Console.WriteLine("Testing");
-                rosterManagement?.AddMemberToRoster(e.Guild.CurrentMember);
+                rosterManagement?.AddMemberToRoster(e.User);
             }
             else
             {

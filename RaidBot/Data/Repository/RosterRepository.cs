@@ -17,7 +17,7 @@ public class RosterRepository : IRosterRepository
     }
 
 
-    public async Task<Roster?> AddMemberToRoster(ulong guildId, string raidName, DiscordMember member, string role)
+    public async Task<Roster?> AddMemberToRoster(ulong guildId, string raidName, DiscordUser member, string role)
     {
         try
         {
@@ -30,7 +30,7 @@ public class RosterRepository : IRosterRepository
                 return null;
             }
     
-            var findRaid = findGuild.RaidList.FirstOrDefault(x => x.RaidName == raidName);
+            // var findRaid = findGuild.RaidList.FirstOrDefault(x => x.RaidName == raidName);
 
             var getRosterList = await _context.RaidSettings.Include(x => x.Roster)
                 .FirstOrDefaultAsync(x => x.RaidName == raidName && x.GuildId == guildId);
@@ -40,14 +40,14 @@ public class RosterRepository : IRosterRepository
             {
                 roster = new Roster()
                 {
-                    RaidName = raidName
+                    RaidName = raidName,
                 };
                 _context.Rosters.Add(roster);
                 await _context.SaveChangesAsync();
             }
             else
             {
-                roster = getRosterList.Roster ?? new Roster();
+                roster = getRosterList.Roster ?? new Roster() { RaidName = raidName , RosterSettingsId = getRosterList.Id};
             }
 
             var mainRoster = new MainRoster()
@@ -59,7 +59,9 @@ public class RosterRepository : IRosterRepository
             };
 
             roster.MainRoster ??= new List<MainRoster>();
-            roster.MainRoster?.Add(mainRoster);
+            roster.MainRoster.Add(mainRoster);
+            
+            mainRoster.Roster = roster;
             _context.MainRosters.Add(mainRoster);
 
             return (await _context.SaveChangesAsync() > 0 ? roster : null)!;

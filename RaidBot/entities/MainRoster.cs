@@ -14,5 +14,5 @@ public class MainRoster
     public int MainRosterId { get; set; }
 
     [ForeignKey("MainRosterId")]
-    public Roster? Roster { get; set; }
+    public Roster Roster { get; set; }
 }

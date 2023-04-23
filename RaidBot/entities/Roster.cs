@@ -12,5 +12,5 @@ public class Roster
     public ICollection<BackUpRoster>? BackUpRoster { get; set; }
     public int RosterSettingsId { get; set; }
     [ForeignKey("RosterSettingsId")]
-    public RaidSettings? RaidSettings { get; set; }
+    public RaidSettings RaidSettings { get; set; }
 }

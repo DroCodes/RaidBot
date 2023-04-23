@@ -13,7 +13,7 @@ public class RaidRosterManagement
         _roster = roster;
     }
 
-    public async Task<Roster?> AddMemberToRoster(DiscordMember member)
+    public async Task<Roster?> AddMemberToRoster(DiscordUser member)
     {
         try
         {
